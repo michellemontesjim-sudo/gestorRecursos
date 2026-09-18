@@ -1,4 +1,4 @@
-package com.studyhub.api.controllers;
+package com.example.gestorRecursos.Controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
