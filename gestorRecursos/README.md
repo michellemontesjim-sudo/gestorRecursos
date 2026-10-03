@@ -1,3 +1,13 @@
+## Equipo
+- Michelle Montes Jiménez
+- Juan Pablo Alba Ballesteros
+- Sebastián Vargas Montenegro
+- David Alejandro Potes Muñoz
+
+# NOTA: 
+Problema real, objetivos específicos, alcance, diagramas y base de datos en
+el PDF "Definición_alcance y modelo de datos" ubicado en el repositorio avanceFrontend.
+
 # Gestor de Recursos Universitarios (Apunta)
 
 Este proyecto es una plataforma web full-stack diseñada para compartir y organizar material de estudio universitario (resúmenes, parciales pasados, guías). Permite a los estudiantes registrarse, subir documentos clasificados por asignatura y calificar los aportes de la comunidad.
@@ -21,7 +31,7 @@ Antes de levantar el proyecto en tu máquina local, asegúrate de tener instalad
 ### 1. Configurar la Base de Datos
 No uses Spring Boot para generar las tablas. Debes crear la estructura localmente:
 1. Abre MySQL Workbench.
-2. Copia el contenido del archivo `database_schema.sql` (ubicado en la carpeta del backend).
+2. Copia el contenido del archivo `database_schema.sql` (ubicado en la carpeta del backend llamada recursosScriptsBD).
 3. Ejecuta el script. Esto creará el esquema `gestorRecursos_db` y las tablas vacías (`Usuario`, `Asignatura`, `Documento`, `Valoracion`).
 
 ### 2. Configurar el Backend (Spring Boot)
@@ -30,10 +40,3 @@ No uses Spring Boot para generar las tablas. Debes crear la estructura localment
 3. ¡Importante! Cambia la línea `spring.datasource.password=root` poniendo la contraseña que usas localmente en tu propio MySQL.
 4. Ejecuta el proyecto, se puede usar el botón "Run" en `GestorRecursosApplication.java`
 5. Verifica que el servidor funciona entrando en tu navegador a: `http://localhost:8080/api/health`
-
-
-## Equipo
-- Michelle Montes Jiménez
-- Juan Pablo Alba Ballesteros
-- Sebastian Vargas Montenegro
-- David Alejandro Potes Muñoz
