@@ -1,0 +1,68 @@
+<div class="auth-shell">
+    <aside class="auth-side grid-texture">
+      <a href="inicio" class="brand"><span class="tab"></span>Apunta</a>
+      <p class="auth-quote">“Subí mis resúmenes de Biología y en una semana ya tenían mejor calificación que mis notas
+        del parcial.” <span>— estudiante de primer semestre</span></p>
+      <div class="auth-stat">
+        <div><strong>+120</strong><small>documentos activos</small></div>
+        <div><strong>8</strong><small>materias cubiertas</small></div>
+      </div>
+    </aside>
+
+    <div class="auth-main">
+      <div class="auth-card">
+        <a href="inicio" class="brand brand-mobile"><span class="tab"></span>Apunta</a>
+        <p class="kicker">Únete a la comunidad</p>
+        <h1>Crea tu cuenta</h1>
+        <p>Regístrate con tu correo para empezar a subir y descargar material.</p>
+
+        <div class="form-status ok" id="formStatus" role="status" aria-live="polite">Registro simulado — aún no hay backend conectado.</div>
+
+        <form id="registroForm" (ngSubmit)="registrar()">
+          <div class="field">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" [(ngModel)]="nuevoUsuario.nombre" placeholder="Sebastián Ramírez" required autocomplete="name"
+              aria-describedby="nombre-error">
+            <small class="field-error" id="nombre-error"></small>
+          </div>
+          <div class="field">
+            <label for="correo">Correo institucional</label>
+            <input type="email" id="correo" name="correo" [(ngModel)]="nuevoUsuario.correo" placeholder="nombre@uao.edu.co" required autocomplete="email"
+              aria-describedby="correo-error">
+            <small class="field-error" id="correo-error"></small>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="contrasena">Contraseña</label>
+              <div class="input-wrap">
+                <input type="password" id="contrasena" name="contrasena" [(ngModel)]="nuevoUsuario.contrasena" placeholder="••••••••" required minlength="8"
+                  autocomplete="new-password" aria-describedby="contrasena-error">
+                <button type="button" class="toggle-pass" aria-controls="contrasena" aria-pressed="false" aria-label="Mostrar contraseña">Mostrar</button>
+              </div>
+              <small class="field-error" id="contrasena-error"></small>
+            </div>
+            <div class="field">
+              <label for="confirmar">Confirmar contraseña</label>
+              <div class="input-wrap">
+                <input type="password" id="confirmar" name="confirmar" placeholder="••••••••" required minlength="8"
+                  autocomplete="new-password" aria-describedby="confirmar-error">
+                <button type="button" class="toggle-pass" aria-controls="confirmar" aria-pressed="false" aria-label="Mostrar confirmación de contraseña">Mostrar</button>
+              </div>
+              <small class="field-error" id="confirmar-error"></small>
+            </div>
+          </div>
+          <p class="field-hint" id="passwordHint">Mínimo 8 caracteres.</p>
+
+          <div class="field" style="margin-top:18px;">
+            <label class="checkbox-line"><input type="checkbox" id="terminos" required
+                aria-describedby="terminos-error"> Acepto los términos de uso</label>
+            <small class="field-error" id="terminos-error"></small>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Crear cuenta</button>
+        </form>
+
+        <p class="auth-switch">¿Ya tienes cuenta? <a href="login" class="link-pen">Inicia sesión</a></p>
+      </div>
+    </div>
+  </div>

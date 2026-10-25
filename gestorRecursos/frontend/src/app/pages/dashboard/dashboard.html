@@ -1,0 +1,170 @@
+<div class="crear-materia-container"
+  style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+  <h3>Agregar nueva Asignatura</h3>
+
+  <form style="display: flex; gap: 10px; align-items: center;">
+
+    <input type="text" name="nombre" [(ngModel)]="nuevaMateria.nombre" placeholder="Nombre de la materia" required
+      style="padding: 8px;">
+
+    <input type="number" name="semestre" [(ngModel)]="nuevaMateria.semestre" placeholder="Semestre (ej. 3)" required
+      style="padding: 8px; width: 120px;">
+
+    <button type="button" (click)="guardarMateria()"
+      style="padding: 8px 15px; background-color: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      @if (modoEdicion) { Actualizar } @else { Crear }
+    </button>
+
+    @if (modoEdicion) {
+    <button type="button" (click)="cancelarEdicion()"
+      style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      Cancelar
+    </button>
+    }
+
+  </form>
+</div>
+
+<div class="materias-grid">
+
+  @for (materia of listaMaterias; track materia.idAsignatura) {
+
+  <!-- Agregamos cursor: pointer y el evento (click) a toda la tarjeta -->
+  <div class="materia-chip" style="position: relative; cursor: pointer;" (click)="verDocumentos(materia)">
+
+    <div class="n">{{ materia.nombre }}</div>
+    <div class="s">Semestre {{ materia.semestre }}</div>
+
+    <!-- Botón editar con stopPropagation -->
+    <button (click)="prepararEdicion(materia); $event.stopPropagation()"
+      style="position: absolute; top: 8px; right: 40px; background: #3498db; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+      ✎
+    </button>
+
+    <!-- Botón eliminar con stopPropagation -->
+    <button (click)="eliminarMateria(materia.idAsignatura); $event.stopPropagation()"
+      style="position: absolute; top: 8px; right: 8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">
+      X
+    </button>
+
+  </div>
+
+  } @empty {
+  <div style="grid-column: 1 / -1; text-align: center; color: #666;">
+    <p>No hay materias registradas en la base de datos aún.</p>
+  </div>
+  }
+
+</div>
+
+<!-- VISOR DE DOCUMENTOS (Solo aparece si seleccionas una materia) -->
+@if (asignaturaSeleccionada) {
+<div style="margin-top: 30px; padding: 20px; background: #ffffff; border-radius: 8px; border: 1px solid #dcdde1; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f2f6; padding-bottom: 10px; margin-bottom: 15px;">
+    <h3 style="margin: 0; color: #2c3e50;">📚 Apuntes de {{ asignaturaSeleccionada.nombre }}</h3>
+    <button (click)="cerrarVisor()" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Cerrar X</button>
+  </div>
+
+  @if (documentosMateria.length > 0) {
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      
+      @for (doc of documentosMateria; track doc.idDocumento) {
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 15px;">
+          
+          <!-- INFO DEL DOCUMENTO Y PROMEDIO -->
+          <div style="flex: 1;">
+            <strong style="display: block; color: #2c3e50; font-size: 16px;">{{ doc.titulo || doc.nombreArchivoOriginal }}</strong>
+            <span style="font-size: 12px; color: #7f8c8d;">Tipo: {{ doc.tipoArchivo }}</span>
+            
+            <!-- Aquí mostramos el promedio y cantidad de reseñas desde la base de datos -->
+            <div style="margin-top: 5px; font-size: 14px; color: #f39c12; font-weight: bold;">
+              ⭐ {{ doc.promedio_valoracion }} / 5.0 
+              <span style="color: #95a5a6; font-size: 12px; font-weight: normal;">({{ doc.num_valoraciones }} valoraciones)</span>
+            </div>
+          </div>
+          
+          <!-- BOTONES DE ACCIÓN -->
+          <div style="display: flex; gap: 10px;">
+            <button (click)="abrirFormularioValoracion(doc)" style="background: #f39c12; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">
+              ⭐ Calificar
+            </button>
+            <a [href]="'http://localhost:8080/api/documentos/descargar/' + doc.ruta_archivo" target="_blank" 
+               style="background: #27ae60; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">
+              ⬇ Descargar
+            </a>
+          </div>
+
+          <!-- FORMULARIO DESPLEGABLE DE VALORACIÓN (Solo aparece si seleccionas ESTE documento) -->
+          @if (documentoAValorar?.idDocumento === doc.idDocumento) {
+            <div style="width: 100%; margin-top: 10px; padding: 15px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #e67e22;">
+              <h4 style="margin-top: 0; color: #d35400;">Calificando: {{ doc.titulo || doc.nombreArchivoOriginal }}</h4>
+              
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <select name="puntuacion" [(ngModel)]="nuevaValoracion.puntuacion_numerica" style="padding: 8px; border-radius: 4px;">
+                  <option [ngValue]="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                  <option [ngValue]="4">⭐⭐⭐⭐ (4/5)</option>
+                  <option [ngValue]="3">⭐⭐⭐ (3/5)</option>
+                  <option [ngValue]="2">⭐⭐ (2/5)</option>
+                  <option [ngValue]="1">⭐ (1/5)</option>
+                </select>
+
+                <button (click)="enviarValoracion()" style="background: #2980b9; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                  Enviar
+                </button>
+                <button (click)="cancelarValoracion()" style="background: #bdc3c7; color: #2c3e50; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
+
+        </div>
+      }
+
+    </div>
+  } @else {
+    <p style="text-align: center; color: #7f8c8d; padding: 20px 0;">Aún no hay apuntes para esta materia. ¡Sé el primero en subir uno!</p>
+  }
+</div>
+}
+
+
+<!-- Sección para Subir Apuntes -->
+<div style="margin-top: 40px; padding: 20px; background: #fdf5e6; border-radius: 8px;">
+
+  <h3>Subir un nuevo Apunte</h3>
+  <p style="font-size: 14px; color: #555;">Sube tu PDF o documento para compartirlo con la comunidad.</p>
+
+  <!-- Formulario de Subida Dinámico -->
+  <form style="display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin-top: 15px;">
+
+    <!-- NUEVO: Selector de Asignatura corregido -->
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 5px;">¿A qué materia pertenece?</label>
+      <select name="asignatura" [(ngModel)]="idAsignaturaDestino" style="padding: 8px; width: 100%; border-radius: 4px;">
+        
+        <!-- Usamos @for y listaMaterias, igual que en tus tarjetas -->
+        @for (materia of listaMaterias; track materia.idAsignatura) {
+          <option [value]="materia.idAsignatura">
+            {{ materia.nombre }} - Semestre {{ materia.semestre }}
+          </option>
+        }
+        
+      </select>
+    </div>
+
+    <!-- Input para seleccionar el archivo -->
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 5px;">Selecciona tu archivo:</label>
+      <input type="file" accept=".pdf,.doc,.docx" (change)="capturarArchivo($event)" style="padding: 5px;">
+    </div>
+
+    <button type="button" (click)="subirApunte()"
+      style="padding: 10px; background-color: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+      Subir a la Plataforma
+    </button>
+  </form>
+</div>
+
+<button (click)="cerrarSesion()" class="btn btn-ghost">Cerrar sesión</button>
