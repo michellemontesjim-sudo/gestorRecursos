@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+
 
 @Component({
   selector: 'app-registro',
@@ -18,8 +19,14 @@ export class RegistroComponent {
     contrasena: ''
   };
 
+  // --- CONTROLADORES DEL MODAL ---
+  modalVisible: boolean = false;
+  modalTitulo: string = '';
+  modalMensaje: string = '';
+  modalTipo: 'alerta' | 'confirmacion' = 'alerta';
+  accionConfirmacion: () => void = () => {};
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   registrar() {
     // URL de tu controlador en Spring Boot
@@ -28,17 +35,49 @@ export class RegistroComponent {
     // 4. Hacemos la petición POST
     this.http.post(urlBackend, this.nuevoUsuario, { responseType: 'text' }).subscribe({
       next: (respuesta) => {
-      
         console.log("Respuesta del servidor:", respuesta);
-        alert("¡Cuenta creada exitosamente en la base de datos!"); 
-        // Opcional: limpiar el formulario
+        
+        // Reemplazamos el alert() nativo
+        this.mostrarAlerta("¡Registro Exitoso!", "¡Tu cuenta ha sido creada exitosamente! Ya puedes iniciar sesión."); 
+        
+        // Limpiamos el formulario
         this.nuevoUsuario = { nombre: '', correo: '', contrasena: '' };
       },
       error: (error) => {
-      
         console.error("Error del servidor:", error);
-        alert("No se pudo registrar. ¿El correo ya existe?");
+        
+        // Reemplazamos el alert() nativo
+        this.mostrarAlerta("Error de Registro", "No se pudo registrar. Es posible que el correo ya esté registrado.");
       }
     });
+  }
+
+  // --- FUNCIONES DEL MODAL ---
+  
+  mostrarAlerta(titulo: string, mensaje: string) {
+    this.modalTitulo = titulo;
+    this.modalMensaje = mensaje;
+    this.modalTipo = 'alerta';
+    this.modalVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  mostrarConfirmacion(titulo: string, mensaje: string, accion: () => void) {
+    this.modalTitulo = titulo;
+    this.modalMensaje = mensaje;
+    this.modalTipo = 'confirmacion';
+    this.accionConfirmacion = accion;
+    this.modalVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModal() {
+    this.modalVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  ejecutarConfirmacion() {
+    this.accionConfirmacion();
+    this.cerrarModal();
   }
 }

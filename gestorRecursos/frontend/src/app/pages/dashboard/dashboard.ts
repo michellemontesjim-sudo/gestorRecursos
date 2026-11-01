@@ -56,7 +56,7 @@ export class DashboardComponent implements OnInit {
 
   guardarMateria() {
     if (!this.nuevaMateria.nombre || this.nuevaMateria.nombre.trim() === '' || !this.nuevaMateria.semestre) {
-      alert("Por favor llena el nombre y el semestre.");
+      this.mostrarAlerta("Campos Incompletos", "Por favor llena el nombre y el semestre.");
       return;
     }
 
@@ -89,19 +89,21 @@ export class DashboardComponent implements OnInit {
   }
 
   eliminarMateria(id: number) {
-    // Pedimos confirmación para evitar borrados accidentales
-    const confirmar = confirm("¿Estás segura de que deseas eliminar esta asignatura?");
-    
-    if (confirmar) {
-      this.http.delete(`http://localhost:8080/api/asignaturas/${id}`).subscribe({
-        next: () => {
-          // Filtramos la lista para dejar todas las materias MENOS la que acabamos de borrar
-          this.listaMaterias = this.listaMaterias.filter(m => m.idAsignatura !== id);
-          this.cdr.detectChanges(); // Actualizamos la pantalla al instante
-        },
-        error: (error) => console.error("Error al eliminar:", error)
-      });
-    }
+    this.mostrarConfirmacion(
+      "Eliminar Asignatura", 
+      "¿Estás segura de que deseas eliminar esta asignatura? Esta acción no se puede deshacer.",
+      () => {
+        this.http.delete(`http://localhost:8080/api/asignaturas/${id}`).subscribe({
+          next: () => {
+            // Filtramos la lista para dejar todas las materias MENOS la que acabamos de borrar
+            this.listaMaterias = this.listaMaterias.filter(m => m.idAsignatura !== id);
+            this.cdr.detectChanges(); // Actualizamos la pantalla al instante
+            this.mostrarAlerta("Éxito", "Asignatura eliminada correctamente.");
+          },
+          error: (error) => console.error("Error al eliminar:", error)
+        });
+      }
+    );
   }
 
   // --- SECCIÓN DE VALORACIONES DINÁMICAS ---
@@ -127,7 +129,6 @@ export class DashboardComponent implements OnInit {
   }
 
   // 3. Envía la valoración al backend
-  // 3. Envía la valoración al backend
   enviarValoracion() {
     const usuarioGuardado = localStorage.getItem('usuarioLogueado');
     
@@ -135,7 +136,7 @@ export class DashboardComponent implements OnInit {
       const usuarioJson = JSON.parse(usuarioGuardado);
       this.nuevaValoracion.idUsuario = usuarioJson.idUsuario || usuarioJson.id; 
     } else {
-      alert("Error: No hay una sesión activa.");
+      this.mostrarAlerta("Sesión Inválida", "Error: No hay una sesión activa.");
       return;
     }
 
@@ -148,7 +149,7 @@ export class DashboardComponent implements OnInit {
     // 3. Enviamos la petición usando los datos clonados
     this.http.post<any>('http://localhost:8080/api/valoraciones', valoracionAEnviar).subscribe({
       next: (respuesta) => {
-        alert("¡Valoración guardada con éxito!");
+        this.mostrarAlerta("¡Éxito!", "¡Valoración guardada con éxito!");
         
         // Recargamos los documentos para que se actualice el promedio en pantalla
         if (this.asignaturaSeleccionada) {
@@ -157,7 +158,7 @@ export class DashboardComponent implements OnInit {
       },
       error: (error) => {
         console.error("Error del servidor:", error);
-        alert("El servidor rechazó la acción. Es probable que ya hayas valorado este documento.");
+        this.mostrarAlerta("Acción denegada", "Es probable que ya hayas valorado este documento o sea el tuyo propio.");
       }
     });
   
@@ -178,7 +179,7 @@ export class DashboardComponent implements OnInit {
   // 2. Esta función arma el paquete form-data y lo envía
   subirApunte() {
     if (!this.archivoSeleccionado) {
-      alert("Por favor, selecciona un archivo primero.");
+      this.mostrarAlerta("Atención", "Por favor, selecciona un archivo primero.");
       return;
     }
 
@@ -190,7 +191,7 @@ export class DashboardComponent implements OnInit {
       const usuarioJson = JSON.parse(usuarioGuardado);
       idUsuarioActual = usuarioJson.idUsuario || usuarioJson.id;
     } else {
-      alert("Error: No hay una sesión activa.");
+      this.mostrarAlerta("Sesión Inválida", "Error: No hay una sesión activa.");
       return;
     }
 
@@ -206,13 +207,13 @@ export class DashboardComponent implements OnInit {
     
     this.http.post<any>('http://localhost:8080/api/documentos/subir', formData).subscribe({
       next: (respuesta) => {
-        alert("¡Apunte subido y guardado con éxito!");
+        this.mostrarAlerta("¡Subida Exitosa!", "Tu apunte se ha compartido con la comunidad.");
         this.archivoSeleccionado = null; // Limpiamos la variable
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error("Error al subir el archivo:", error);
-        alert("El servidor rechazó el archivo. Revisa la consola.");
+        this.mostrarAlerta("Error", "El servidor rechazó el archivo o es demasiado pesado.");
       }
     });
   }
@@ -244,4 +245,39 @@ export class DashboardComponent implements OnInit {
     localStorage.removeItem('usuarioLogueado');
     this.router.navigate(['/login']);
   }
+
+  // --- CONTROLADORES DEL MODAL ---
+  modalVisible: boolean = false;
+  modalTitulo: string = '';
+  modalMensaje: string = '';
+  modalTipo: 'alerta' | 'confirmacion' = 'alerta';
+  accionConfirmacion: () => void = () => {}; // Guarda la función que se ejecutará si el usuario dice "Sí"
+
+  mostrarAlerta(titulo: string, mensaje: string) {
+    this.modalTitulo = titulo;
+    this.modalMensaje = mensaje;
+    this.modalTipo = 'alerta';
+    this.modalVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  mostrarConfirmacion(titulo: string, mensaje: string, accion: () => void) {
+    this.modalTitulo = titulo;
+    this.modalMensaje = mensaje;
+    this.modalTipo = 'confirmacion';
+    this.accionConfirmacion = accion;
+    this.modalVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModal() {
+    this.modalVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  ejecutarConfirmacion() {
+    this.accionConfirmacion(); // Ejecuta lo que estaba pendiente
+    this.cerrarModal(); // Cierra la ventana
+  }
+
 }
