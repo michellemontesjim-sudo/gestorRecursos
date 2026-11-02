@@ -131,22 +131,26 @@
     <!-- SUBIR APUNTE -->
     <section class="panel" aria-labelledby="titulo-subir">
       <h2 id="titulo-subir">Subir apunte</h2>
-      <p class="panel-desc">PDF o Word, hasta 20 MB.</p>
+      <p class="panel-desc">
+        @if (listaMaterias.length > 0) { PDF o Word, hasta 20 MB. } @else { Primero crea una asignatura para poder subir apuntes. }
+      </p>
 
       <form (ngSubmit)="subirApunte()">
         <div class="field">
           <label for="asignatura">Materia</label>
-          <select id="asignatura" name="asignatura" [(ngModel)]="idAsignaturaDestino">
+          <select id="asignatura" name="asignatura" [(ngModel)]="idAsignaturaDestino"
+            [disabled]="listaMaterias.length === 0">
             @for (materia of listaMaterias; track materia.idAsignatura) {
-            <option [value]="materia.idAsignatura">{{ materia.nombre }} — Semestre {{ materia.semestre }}</option>
+            <option [ngValue]="materia.idAsignatura">{{ materia.nombre }} — Semestre {{ materia.semestre }}</option>
             }
           </select>
         </div>
         <div class="field">
           <label for="archivo">Archivo</label>
-          <input type="file" id="archivo" accept=".pdf,.doc,.docx" (change)="capturarArchivo($event)">
+          <input #inputArchivo type="file" id="archivo" accept=".pdf,.doc,.docx" (change)="capturarArchivo($event)">
         </div>
-        <button type="submit" class="btn btn-primary btn-block" [disabled]="subiendo" [class.is-loading]="subiendo">
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="subiendo || listaMaterias.length === 0"
+          [class.is-loading]="subiendo">
           {{ subiendo ? 'Subiendo…' : 'Subir apunte' }}
         </button>
       </form>

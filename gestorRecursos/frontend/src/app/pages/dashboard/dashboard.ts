@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -57,6 +57,7 @@ export class DashboardComponent implements OnInit {
       next: (datos) => {
         this.listaMaterias = datos;
         this.cargandoMaterias = false;
+        this.elegirMateriaDestino();
         this.cdr.detectChanges(); // Obliga a Angular a dibujar la pantalla AL INSTANTE
       },
       error: (error) => {
@@ -102,6 +103,10 @@ export class DashboardComponent implements OnInit {
           if (index !== -1) {
             this.listaMaterias[index] = materiaActualizada;
           }
+          // Si esa materia está abierta en el visor, actualizamos también su título
+          if (this.asignaturaSeleccionada?.idAsignatura === this.idMateriaEditar) {
+            this.asignaturaSeleccionada = materiaActualizada;
+          }
           this.cancelarEdicion(); // Limpiamos el formulario
           this.guardandoMateria = false;
           this.cdr.detectChanges();
@@ -140,6 +145,9 @@ export class DashboardComponent implements OnInit {
           next: () => {
             // Filtramos la lista para dejar todas las materias MENOS la que acabamos de borrar
             this.listaMaterias = this.listaMaterias.filter(m => m.idAsignatura !== id);
+            // Si estaba abierta en el visor o elegida para subir, dejamos de usarla
+            if (this.asignaturaSeleccionada?.idAsignatura === id) this.cerrarVisor();
+            this.elegirMateriaDestino();
             this.cdr.detectChanges(); // Actualizamos la pantalla al instante
             this.mostrarAlerta("Éxito", "Asignatura eliminada correctamente.");
           },
@@ -213,7 +221,16 @@ export class DashboardComponent implements OnInit {
   // --- SECCIÓN DE SUBIDA DE DOCUMENTOS ---
   
   archivoSeleccionado: File | null = null;
-  idAsignaturaDestino: number = 1; // Por defecto lo subiremos a la asignatura 1 para probar
+  idAsignaturaDestino: number | null = null; // Se elige la primera materia al cargar la lista
+  @ViewChild('inputArchivo') inputArchivo?: ElementRef<HTMLInputElement>;
+
+  // Si no hay materia elegida (o se eliminó), elige la primera de la lista
+  elegirMateriaDestino() {
+    const existe = this.listaMaterias.some(m => m.idAsignatura === this.idAsignaturaDestino);
+    if (!existe) {
+      this.idAsignaturaDestino = this.listaMaterias.length > 0 ? this.listaMaterias[0].idAsignatura : null;
+    }
+  }
 
   // 1. Esta función se activa cuando el usuario elige un archivo en su computadora
   capturarArchivo(event: any) {
@@ -226,6 +243,11 @@ export class DashboardComponent implements OnInit {
   subirApunte() {
     if (!this.archivoSeleccionado) {
       this.mostrarAlerta("Atención", "Por favor, selecciona un archivo primero.");
+      return;
+    }
+
+    if (!this.idAsignaturaDestino) {
+      this.mostrarAlerta("Atención", "Elige a qué materia pertenece el apunte.");
       return;
     }
 
@@ -256,7 +278,12 @@ export class DashboardComponent implements OnInit {
       next: (respuesta) => {
         this.mostrarAlerta("¡Subida Exitosa!", "Tu apunte se ha compartido con la comunidad.");
         this.archivoSeleccionado = null; // Limpiamos la variable
+        if (this.inputArchivo) this.inputArchivo.nativeElement.value = ''; // y el campo de archivo
         this.subiendo = false;
+
+        // Abrimos la materia donde se subió para que el apunte nuevo se vea en la lista
+        const materiaDestino = this.listaMaterias.find(m => m.idAsignatura === this.idAsignaturaDestino);
+        if (materiaDestino) this.verDocumentos(materiaDestino);
         this.cdr.detectChanges();
       },
       error: (error) => {
