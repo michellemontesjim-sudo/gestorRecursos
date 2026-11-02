@@ -24,9 +24,19 @@
     <section aria-labelledby="titulo-materias">
       <div class="dash-section-head">
         <h2 id="titulo-materias">Materias</h2>
+        @if (!cargandoMaterias && !errorMaterias) {
         <span class="dash-count">{{ listaMaterias.length }} en total</span>
+        }
       </div>
 
+      @if (cargandoMaterias) {
+      <p class="dash-status" role="status">Cargando materias…</p>
+      } @else if (errorMaterias) {
+      <div class="dash-error" role="alert">
+        <p>No pudimos cargar las materias. Revisa que el servidor esté encendido.</p>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="cargarMaterias()">Reintentar</button>
+      </div>
+      } @else {
       <div class="materias">
         @for (materia of listaMaterias; track materia.idAsignatura) {
         <article class="materia-card"
@@ -47,6 +57,7 @@
         <p class="dash-empty">Todavía no hay materias. Crea la primera desde “Nueva asignatura”.</p>
         }
       </div>
+      }
     </section>
 
     <!-- VISOR DE DOCUMENTOS (solo aparece si seleccionas una materia) -->
@@ -60,6 +71,9 @@
         <button type="button" class="btn btn-ghost btn-sm" (click)="cerrarVisor()">Cerrar</button>
       </div>
 
+      @if (cargandoDocumentos) {
+      <p class="dash-status" role="status">Cargando apuntes…</p>
+      } @else {
       @for (doc of documentosMateria; track doc.idDocumento) {
       <article class="doc">
         <div class="doc-info">
@@ -103,6 +117,7 @@
       } @empty {
       <p class="dash-empty">Aún no hay apuntes para esta materia. Sube el primero desde “Subir apunte”.</p>
       }
+      }
     </section>
     }
   </div>
@@ -127,7 +142,9 @@
           <label for="archivo">Archivo</label>
           <input type="file" id="archivo" accept=".pdf,.doc,.docx" (change)="capturarArchivo($event)">
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Subir apunte</button>
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="subiendo" [class.is-loading]="subiendo">
+          {{ subiendo ? 'Subiendo…' : 'Subir apunte' }}
+        </button>
       </form>
     </section>
 
@@ -147,7 +164,10 @@
             placeholder="Ej. 3" min="1" max="12" required>
         </div>
         <div class="panel-actions">
-          <button type="submit" class="btn btn-primary">{{ modoEdicion ? 'Guardar cambios' : 'Crear asignatura' }}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="guardandoMateria"
+            [class.is-loading]="guardandoMateria">
+            {{ guardandoMateria ? 'Guardando…' : (modoEdicion ? 'Guardar cambios' : 'Crear asignatura') }}
+          </button>
           @if (modoEdicion) {
           <button type="button" class="btn btn-ghost" (click)="cancelarEdicion()">Cancelar</button>
           }

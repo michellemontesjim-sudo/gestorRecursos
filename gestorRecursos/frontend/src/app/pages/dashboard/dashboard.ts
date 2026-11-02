@@ -17,6 +17,13 @@ export class DashboardComponent implements OnInit {
   
   nuevaMateria: any = { nombre: '', semestre: null };
   
+  // Estados de carga y error (para dar feedback al usuario)
+  cargandoMaterias: boolean = true;
+  errorMaterias: boolean = false;
+  cargandoDocumentos: boolean = false;
+  guardandoMateria: boolean = false;
+  subiendo: boolean = false;
+
   // Nuevas variables para controlar el modo edición
   modoEdicion: boolean = false;
   idMateriaEditar: number | null = null;
@@ -43,12 +50,21 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarMaterias() {
+    this.cargandoMaterias = true;
+    this.errorMaterias = false;
+
     this.http.get<any[]>('http://localhost:8080/api/asignaturas').subscribe({
       next: (datos) => {
         this.listaMaterias = datos;
+        this.cargandoMaterias = false;
         this.cdr.detectChanges(); // Obliga a Angular a dibujar la pantalla AL INSTANTE
       },
-      error: (error) => console.error("Error al cargar:", error)
+      error: (error) => {
+        console.error("Error al cargar:", error);
+        this.cargandoMaterias = false;
+        this.errorMaterias = true; // Muestra el aviso con el botón "Reintentar"
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -57,6 +73,9 @@ export class DashboardComponent implements OnInit {
     this.idMateriaEditar = materia.idAsignatura;
     // Hacemos una copia de los datos para no editar directamente la tarjeta hasta guardar
     this.nuevaMateria = { nombre: materia.nombre, semestre: materia.semestre };
+
+    // Lleva el foco al formulario para que se note que ya se puede editar
+    setTimeout(() => document.getElementById('nombre-materia')?.focus());
   }
 
   // 2. Función para cancelar la edición y limpiar el formulario
@@ -72,6 +91,8 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    this.guardandoMateria = true;
+
     if (this.modoEdicion) {
       // MODO ACTUALIZAR (PUT)
       this.http.put<any>(`http://localhost:8080/api/asignaturas/${this.idMateriaEditar}`, this.nuevaMateria).subscribe({
@@ -82,9 +103,14 @@ export class DashboardComponent implements OnInit {
             this.listaMaterias[index] = materiaActualizada;
           }
           this.cancelarEdicion(); // Limpiamos el formulario
+          this.guardandoMateria = false;
           this.cdr.detectChanges();
         },
-        error: (error) => console.error("Error al actualizar:", error)
+        error: (error) => {
+          console.error("Error al actualizar:", error);
+          this.guardandoMateria = false;
+          this.mostrarAlerta("No se pudo actualizar", "Revisa tu conexión e inténtalo de nuevo.");
+        }
       });
 
     } else {
@@ -92,10 +118,15 @@ export class DashboardComponent implements OnInit {
       this.http.post<any>('http://localhost:8080/api/asignaturas', this.nuevaMateria).subscribe({
         next: (materiaGuardada) => {
           this.listaMaterias.push(materiaGuardada);
-          this.cdr.detectChanges();
           this.nuevaMateria = { nombre: '', semestre: null };
+          this.guardandoMateria = false;
+          this.cdr.detectChanges();
         },
-        error: (error) => console.error("Error al guardar:", error)
+        error: (error) => {
+          console.error("Error al guardar:", error);
+          this.guardandoMateria = false;
+          this.mostrarAlerta("No se pudo crear", "Revisa tu conexión e inténtalo de nuevo.");
+        }
       });
     }
   }
@@ -112,7 +143,10 @@ export class DashboardComponent implements OnInit {
             this.cdr.detectChanges(); // Actualizamos la pantalla al instante
             this.mostrarAlerta("Éxito", "Asignatura eliminada correctamente.");
           },
-          error: (error) => console.error("Error al eliminar:", error)
+          error: (error) => {
+            console.error("Error al eliminar:", error);
+            this.mostrarAlerta("No se pudo eliminar", "Es posible que la asignatura tenga apuntes asociados.");
+          }
         });
       }
     );
@@ -216,15 +250,18 @@ export class DashboardComponent implements OnInit {
 
     // Enviamos la petición POST a tu nuevo controlador
     console.log("Subiendo archivo...");
-    
+    this.subiendo = true; // Deshabilita el botón y muestra "Subiendo…"
+
     this.http.post<any>('http://localhost:8080/api/documentos/subir', formData).subscribe({
       next: (respuesta) => {
         this.mostrarAlerta("¡Subida Exitosa!", "Tu apunte se ha compartido con la comunidad.");
         this.archivoSeleccionado = null; // Limpiamos la variable
+        this.subiendo = false;
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error("Error al subir el archivo:", error);
+        this.subiendo = false;
         this.mostrarAlerta("Error", "El servidor rechazó el archivo o es demasiado pesado.");
       }
     });
@@ -237,14 +274,21 @@ export class DashboardComponent implements OnInit {
 
   verDocumentos(materia: any) {
     this.asignaturaSeleccionada = materia;
-    
+    this.documentosMateria = [];
+    this.cargandoDocumentos = true;
+
     // Hacemos el GET al backend buscando los documentos de esta materia específica
     this.http.get<any[]>(`http://localhost:8080/api/documentos/asignatura/${materia.idAsignatura}`).subscribe({
       next: (docs) => {
         this.documentosMateria = docs;
+        this.cargandoDocumentos = false;
         this.cdr.detectChanges();
       },
-      error: (error) => console.error("Error al cargar documentos:", error)
+      error: (error) => {
+        console.error("Error al cargar documentos:", error);
+        this.cargandoDocumentos = false;
+        this.mostrarAlerta("No se pudieron cargar los apuntes", "Revisa que el servidor esté encendido e inténtalo de nuevo.");
+      }
     });
   }
 

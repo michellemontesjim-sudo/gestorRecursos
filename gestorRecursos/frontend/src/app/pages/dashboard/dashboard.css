@@ -106,6 +106,29 @@
   border-radius: var(--radius);
 }
 
+/* Mensajes de carga y error */
+.dash-status {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: var(--ink-light);
+}
+
+.dash-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(178,58,46,0.08);
+  border: 1px solid rgba(178,58,46,0.35);
+  border-radius: var(--radius);
+  color: var(--pen);
+  font-size: 0.9rem;
+}
+.dash-error p { margin: 0; }
+
 /* ---------- Tarjetas de materia ---------- */
 .materias {
   display: grid;
