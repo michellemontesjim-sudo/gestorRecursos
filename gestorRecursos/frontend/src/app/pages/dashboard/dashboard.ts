@@ -1,12 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink, DecimalPipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -16,6 +17,13 @@ export class DashboardComponent implements OnInit {
   
   nuevaMateria: any = { nombre: '', semestre: null };
   
+  // Estados de carga y error (para dar feedback al usuario)
+  cargandoMaterias: boolean = true;
+  errorMaterias: boolean = false;
+  cargandoDocumentos: boolean = false;
+  guardandoMateria: boolean = false;
+  subiendo: boolean = false;
+
   // Nuevas variables para controlar el modo edición
   modoEdicion: boolean = false;
   idMateriaEditar: number | null = null;
@@ -26,17 +34,38 @@ export class DashboardComponent implements OnInit {
     private cdr: ChangeDetectorRef 
   ) {}
 
+  // Nombre del usuario en sesión, para el saludo del encabezado
+  nombreUsuario: string = '';
+
+  get primerNombre(): string {
+    return this.nombreUsuario.split(' ')[0];
+  }
+
   ngOnInit() {
+    const usuarioGuardado = localStorage.getItem('usuarioLogueado');
+    if (usuarioGuardado) {
+      this.nombreUsuario = JSON.parse(usuarioGuardado).nombre || '';
+    }
     this.cargarMaterias();
   }
 
   cargarMaterias() {
+    this.cargandoMaterias = true;
+    this.errorMaterias = false;
+
     this.http.get<any[]>('http://localhost:8080/api/asignaturas').subscribe({
       next: (datos) => {
         this.listaMaterias = datos;
+        this.cargandoMaterias = false;
+        this.elegirMateriaDestino();
         this.cdr.detectChanges(); // Obliga a Angular a dibujar la pantalla AL INSTANTE
       },
-      error: (error) => console.error("Error al cargar:", error)
+      error: (error) => {
+        console.error("Error al cargar:", error);
+        this.cargandoMaterias = false;
+        this.errorMaterias = true; // Muestra el aviso con el botón "Reintentar"
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -45,6 +74,9 @@ export class DashboardComponent implements OnInit {
     this.idMateriaEditar = materia.idAsignatura;
     // Hacemos una copia de los datos para no editar directamente la tarjeta hasta guardar
     this.nuevaMateria = { nombre: materia.nombre, semestre: materia.semestre };
+
+    // Lleva el foco al formulario para que se note que ya se puede editar
+    setTimeout(() => document.getElementById('nombre-materia')?.focus());
   }
 
   // 2. Función para cancelar la edición y limpiar el formulario
@@ -60,6 +92,8 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    this.guardandoMateria = true;
+
     if (this.modoEdicion) {
       // MODO ACTUALIZAR (PUT)
       this.http.put<any>(`http://localhost:8080/api/asignaturas/${this.idMateriaEditar}`, this.nuevaMateria).subscribe({
@@ -69,10 +103,19 @@ export class DashboardComponent implements OnInit {
           if (index !== -1) {
             this.listaMaterias[index] = materiaActualizada;
           }
+          // Si esa materia está abierta en el visor, actualizamos también su título
+          if (this.asignaturaSeleccionada?.idAsignatura === this.idMateriaEditar) {
+            this.asignaturaSeleccionada = materiaActualizada;
+          }
           this.cancelarEdicion(); // Limpiamos el formulario
+          this.guardandoMateria = false;
           this.cdr.detectChanges();
         },
-        error: (error) => console.error("Error al actualizar:", error)
+        error: (error) => {
+          console.error("Error al actualizar:", error);
+          this.guardandoMateria = false;
+          this.mostrarAlerta("No se pudo actualizar", "Revisa tu conexión e inténtalo de nuevo.");
+        }
       });
 
     } else {
@@ -80,10 +123,15 @@ export class DashboardComponent implements OnInit {
       this.http.post<any>('http://localhost:8080/api/asignaturas', this.nuevaMateria).subscribe({
         next: (materiaGuardada) => {
           this.listaMaterias.push(materiaGuardada);
-          this.cdr.detectChanges();
           this.nuevaMateria = { nombre: '', semestre: null };
+          this.guardandoMateria = false;
+          this.cdr.detectChanges();
         },
-        error: (error) => console.error("Error al guardar:", error)
+        error: (error) => {
+          console.error("Error al guardar:", error);
+          this.guardandoMateria = false;
+          this.mostrarAlerta("No se pudo crear", "Revisa tu conexión e inténtalo de nuevo.");
+        }
       });
     }
   }
@@ -97,10 +145,16 @@ export class DashboardComponent implements OnInit {
           next: () => {
             // Filtramos la lista para dejar todas las materias MENOS la que acabamos de borrar
             this.listaMaterias = this.listaMaterias.filter(m => m.idAsignatura !== id);
+            // Si estaba abierta en el visor o elegida para subir, dejamos de usarla
+            if (this.asignaturaSeleccionada?.idAsignatura === id) this.cerrarVisor();
+            this.elegirMateriaDestino();
             this.cdr.detectChanges(); // Actualizamos la pantalla al instante
             this.mostrarAlerta("Éxito", "Asignatura eliminada correctamente.");
           },
-          error: (error) => console.error("Error al eliminar:", error)
+          error: (error) => {
+            console.error("Error al eliminar:", error);
+            this.mostrarAlerta("No se pudo eliminar", "Es posible que la asignatura tenga apuntes asociados.");
+          }
         });
       }
     );
@@ -167,7 +221,16 @@ export class DashboardComponent implements OnInit {
   // --- SECCIÓN DE SUBIDA DE DOCUMENTOS ---
   
   archivoSeleccionado: File | null = null;
-  idAsignaturaDestino: number = 1; // Por defecto lo subiremos a la asignatura 1 para probar
+  idAsignaturaDestino: number | null = null; // Se elige la primera materia al cargar la lista
+  @ViewChild('inputArchivo') inputArchivo?: ElementRef<HTMLInputElement>;
+
+  // Si no hay materia elegida (o se eliminó), elige la primera de la lista
+  elegirMateriaDestino() {
+    const existe = this.listaMaterias.some(m => m.idAsignatura === this.idAsignaturaDestino);
+    if (!existe) {
+      this.idAsignaturaDestino = this.listaMaterias.length > 0 ? this.listaMaterias[0].idAsignatura : null;
+    }
+  }
 
   // 1. Esta función se activa cuando el usuario elige un archivo en su computadora
   capturarArchivo(event: any) {
@@ -180,6 +243,11 @@ export class DashboardComponent implements OnInit {
   subirApunte() {
     if (!this.archivoSeleccionado) {
       this.mostrarAlerta("Atención", "Por favor, selecciona un archivo primero.");
+      return;
+    }
+
+    if (!this.idAsignaturaDestino) {
+      this.mostrarAlerta("Atención", "Elige a qué materia pertenece el apunte.");
       return;
     }
 
@@ -204,15 +272,23 @@ export class DashboardComponent implements OnInit {
 
     // Enviamos la petición POST a tu nuevo controlador
     console.log("Subiendo archivo...");
-    
+    this.subiendo = true; // Deshabilita el botón y muestra "Subiendo…"
+
     this.http.post<any>('http://localhost:8080/api/documentos/subir', formData).subscribe({
       next: (respuesta) => {
         this.mostrarAlerta("¡Subida Exitosa!", "Tu apunte se ha compartido con la comunidad.");
         this.archivoSeleccionado = null; // Limpiamos la variable
+        if (this.inputArchivo) this.inputArchivo.nativeElement.value = ''; // y el campo de archivo
+        this.subiendo = false;
+
+        // Abrimos la materia donde se subió para que el apunte nuevo se vea en la lista
+        const materiaDestino = this.listaMaterias.find(m => m.idAsignatura === this.idAsignaturaDestino);
+        if (materiaDestino) this.verDocumentos(materiaDestino);
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error("Error al subir el archivo:", error);
+        this.subiendo = false;
         this.mostrarAlerta("Error", "El servidor rechazó el archivo o es demasiado pesado.");
       }
     });
@@ -225,15 +301,45 @@ export class DashboardComponent implements OnInit {
 
   verDocumentos(materia: any) {
     this.asignaturaSeleccionada = materia;
-    
+    this.documentosMateria = [];
+    this.cargandoDocumentos = true;
+
     // Hacemos el GET al backend buscando los documentos de esta materia específica
     this.http.get<any[]>(`http://localhost:8080/api/documentos/asignatura/${materia.idAsignatura}`).subscribe({
       next: (docs) => {
         this.documentosMateria = docs;
+        this.cargandoDocumentos = false;
         this.cdr.detectChanges();
       },
-      error: (error) => console.error("Error al cargar documentos:", error)
+      error: (error) => {
+        console.error("Error al cargar documentos:", error);
+        this.cargandoDocumentos = false;
+        this.mostrarAlerta("No se pudieron cargar los apuntes", "Revisa que el servidor esté encendido e inténtalo de nuevo.");
+      }
     });
+  }
+
+  // --- FORMATO DE LOS METADATOS DEL DOCUMENTO ---
+
+  // "application/pdf" -> "PDF"; si no reconoce el tipo, usa la extensión del archivo
+  tipoLegible(doc: any): string {
+    const tipo: string = doc.tipoArchivo || '';
+    if (tipo.includes('pdf')) return 'PDF';
+    if (tipo.includes('word')) return 'Word';
+    const nombre: string = doc.nombreArchivoOriginal || '';
+    return nombre.includes('.') ? nombre.split('.').pop()!.toUpperCase() : 'Archivo';
+  }
+
+  // 845321 bytes -> "826 KB"; 2304000 bytes -> "2.2 MB"
+  pesoLegible(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  // "2026-10-20T14:32:00" -> "20 de oct de 2026"
+  fechaLegible(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   cerrarVisor() {
