@@ -78,7 +78,11 @@
       <article class="doc">
         <div class="doc-info">
           <h3 class="doc-titulo">{{ doc.titulo || doc.nombreArchivoOriginal }}</h3>
-          <p class="doc-meta">{{ doc.tipoArchivo }}</p>
+          <p class="doc-meta">
+            {{ tipoLegible(doc) }}
+            @if (doc.pesoArchivo) { · {{ pesoLegible(doc.pesoArchivo) }} }
+            @if (doc.fecha_publicacion) { · Subido el {{ fechaLegible(doc.fecha_publicacion) }} }
+          </p>
           <p class="doc-rating">
             @if (doc.num_valoraciones > 0) {
             <span class="mark">★ {{ doc.promedio_valoracion | number: '1.1-1' }}</span>

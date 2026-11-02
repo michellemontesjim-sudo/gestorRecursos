@@ -292,6 +292,29 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  // --- FORMATO DE LOS METADATOS DEL DOCUMENTO ---
+
+  // "application/pdf" -> "PDF"; si no reconoce el tipo, usa la extensión del archivo
+  tipoLegible(doc: any): string {
+    const tipo: string = doc.tipoArchivo || '';
+    if (tipo.includes('pdf')) return 'PDF';
+    if (tipo.includes('word')) return 'Word';
+    const nombre: string = doc.nombreArchivoOriginal || '';
+    return nombre.includes('.') ? nombre.split('.').pop()!.toUpperCase() : 'Archivo';
+  }
+
+  // 845321 bytes -> "826 KB"; 2304000 bytes -> "2.2 MB"
+  pesoLegible(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  // "2026-10-20T14:32:00" -> "20 de oct de 2026"
+  fechaLegible(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
   cerrarVisor() {
     this.asignaturaSeleccionada = null;
     this.documentosMateria = [];
