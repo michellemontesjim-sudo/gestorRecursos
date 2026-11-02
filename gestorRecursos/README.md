@@ -35,8 +35,9 @@ No uses Spring Boot para generar las tablas. Debes crear la estructura localment
 3. Ejecuta el script. Esto creará el esquema `gestorRecursos_db` y las tablas vacías (`Usuario`, `Asignatura`, `Documento`, `Valoracion`).
 
 ### 2. Configurar el Backend (Spring Boot)
-1. En VS Code, abre la carpeta 'target'.
-2. Navega a `application.properties`.
-3. ¡Importante! Cambia la línea `spring.datasource.password=root` poniendo la contraseña que usas localmente en tu propio MySQL.
-4. Ejecuta el proyecto, se puede usar el botón "Run" en `GestorRecursosApplication.java`
+### 2. Configurar el Backend (Spring Boot)
+1. En la raíz del backend (donde está `pom.xml`), copia el archivo `.env.example` y renómbralo a `.env`.
+2. Abre `.env` y escribe tus credenciales locales de MySQL:
+3. No modifiques `application.properties`: ya lee estas variables desde `.env`. El archivo `.env` está en `.gitignore` y no se sube al repositorio.
+4. Ejecuta el proyecto, se puede usar el botón "Run" en `GestorRecursosApplication.java` o el comando `.\mvnw spring-boot:run`.
 5. Verifica que el servidor funciona entrando en tu navegador a: `http://localhost:8080/api/health`

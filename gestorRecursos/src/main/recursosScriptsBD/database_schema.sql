@@ -1,4 +1,4 @@
-CREATE DATABASE gestorRecursos_db;
+   USE gestorRecursos_db;
 
 
 CREATE TABLE Asignatura (
