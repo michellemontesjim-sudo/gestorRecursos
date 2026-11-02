@@ -12,21 +12,35 @@ import { RouterLink } from '@angular/router';
   styleUrl: './registro.css'
 })
 export class RegistroComponent {
-  
+
   nuevoUsuario = {
     nombre: '',
     correo: '',
     contrasena: ''
   };
 
+
+  confirmarContrasena = '';
+  mostrarPassword = false;
+  mostrarConfirmar = false;
+
+  alternarPassword() {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
+
+  alternarConfirmar() {
+    this.mostrarConfirmar = !this.mostrarConfirmar;
+  }
+
+
   // --- CONTROLADORES DEL MODAL ---
   modalVisible: boolean = false;
   modalTitulo: string = '';
   modalMensaje: string = '';
   modalTipo: 'alerta' | 'confirmacion' = 'alerta';
-  accionConfirmacion: () => void = () => {};
+  accionConfirmacion: () => void = () => { };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   registrar() {
     // URL de tu controlador en Spring Boot
@@ -36,16 +50,16 @@ export class RegistroComponent {
     this.http.post(urlBackend, this.nuevoUsuario, { responseType: 'text' }).subscribe({
       next: (respuesta) => {
         console.log("Respuesta del servidor:", respuesta);
-        
+
         // Reemplazamos el alert() nativo
-        this.mostrarAlerta("¡Registro Exitoso!", "¡Tu cuenta ha sido creada exitosamente! Ya puedes iniciar sesión."); 
-        
+        this.mostrarAlerta("¡Registro Exitoso!", "¡Tu cuenta ha sido creada exitosamente! Ya puedes iniciar sesión.");
+
         // Limpiamos el formulario
         this.nuevoUsuario = { nombre: '', correo: '', contrasena: '' };
       },
       error: (error) => {
         console.error("Error del servidor:", error);
-        
+
         // Reemplazamos el alert() nativo
         this.mostrarAlerta("Error de Registro", "No se pudo registrar. Es posible que el correo ya esté registrado.");
       }
@@ -53,7 +67,7 @@ export class RegistroComponent {
   }
 
   // --- FUNCIONES DEL MODAL ---
-  
+
   mostrarAlerta(titulo: string, mensaje: string) {
     this.modalTitulo = titulo;
     this.modalMensaje = mensaje;

@@ -12,20 +12,27 @@ import { RouterLink } from '@angular/router';
   styleUrl: './login.css'
 })
 export class LoginComponent {
-  
+
   credenciales = {
     correo: '',
     contrasena: ''
   };
+
+  mostrarPassword = false;
+
+  alternarPassword() {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
+
 
   // --- CONTROLADORES DEL MODAL ---
   modalVisible: boolean = false;
   modalTitulo: string = '';
   modalMensaje: string = '';
   modalTipo: 'alerta' | 'confirmacion' = 'alerta';
-  accionConfirmacion: () => void = () => {};
+  accionConfirmacion: () => void = () => { };
 
-  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) { }
 
   iniciarSesion() {
     const urlBackend = 'http://localhost:8080/api/usuarios/login';
@@ -35,13 +42,13 @@ export class LoginComponent {
       next: (usuario: any) => {
         // 1. Guardamos al usuario en la memoria del navegador (sesión activa)
         localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
-        
+
         // 2. Lo redirigimos automáticamente a la vista privada
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         console.error("Error en login:", error);
-        
+
         // Reemplazamos el alert() nativo por nuestra alerta personalizada
         this.mostrarAlerta("Error de Autenticación", "Correo o contraseña incorrectos. Por favor, intenta de nuevo.");
       }
@@ -49,7 +56,7 @@ export class LoginComponent {
   }
 
   // --- FUNCIONES DEL MODAL ---
-  
+
   mostrarAlerta(titulo: string, mensaje: string) {
     this.modalTitulo = titulo;
     this.modalMensaje = mensaje;

@@ -1,78 +1,89 @@
 <div class="auth-shell">
-    <aside class="auth-side grid-texture">
-      <a href="inicio" class="brand"><span class="tab"></span>Apunta</a>
-      <p class="auth-quote">“Encontré la guía del segundo corte de Redes diez minutos antes del parcial.” <span>—
-          estudiante de Ing. Multimedia</span></p>
-      <div class="auth-stat">
-        <div><strong>+120</strong><small>documentos activos</small></div>
-        <div><strong>8</strong><small>materias cubiertas</small></div>
-      </div>
-    </aside>
+  <aside class="auth-side grid-texture">
+    <a href="inicio" class="brand"><span class="tab"></span>Apunta</a>
+    <p class="auth-quote">“Encontré la guía del segundo corte de Redes diez minutos antes del parcial.” <span>—
+        estudiante de Ing. Multimedia</span></p>
+    <div class="auth-stat">
+      <div><strong>+120</strong><small>documentos activos</small></div>
+      <div><strong>8</strong><small>materias cubiertas</small></div>
+    </div>
+  </aside>
 
-    <div class="auth-main">
-      <div class="auth-card">
-        <a href="inicio" class="brand brand-mobile"><span class="tab"></span>Apunta</a>
-        <p class="kicker">Bienvenido de nuevo</p>
-        <h1>Inicia sesión</h1>
-        <p>Entra para descargar y subir material de tus materias.</p>
+  <div class="auth-main">
+    <div class="auth-card">
+      <a href="inicio" class="brand brand-mobile"><span class="tab"></span>Apunta</a>
+      <p class="kicker">Bienvenido de nuevo</p>
+      <h1>Inicia sesión</h1>
+      <p>Entra para descargar y subir material de tus materias.</p>
 
-        <div class="form-status ok" id="formStatus" role="status" aria-live="polite">Inicio de sesión simulado — aún no hay backend conectado.</div>
+      <div class="form-status ok" id="formStatus" role="status" aria-live="polite">Inicio de sesión simulado — aún no
+        hay backend conectado.</div>
 
-        <form id="loginForm" (ngSubmit)="iniciarSesion()">
-          <div class="field">
-            <label for="correo">Correo institucional</label>
-            <input type="email" id="correo" name="correo" [(ngModel)]="credenciales.correo" placeholder="nombre@uao.edu.co" required autocomplete="email"
-              aria-describedby="correo-error">
-            <small class="field-error" id="correo-error"></small>
+      <form id="loginForm" (ngSubmit)="iniciarSesion()">
+        <div class="field">
+          <label for="correo">Correo institucional</label>
+          <input type="email" id="correo" name="correo" [(ngModel)]="credenciales.correo"
+            placeholder="nombre@uao.edu.co" required autocomplete="email" aria-describedby="correo-error">
+          <small class="field-error" id="correo-error"></small>
+        </div>
+        <div class="field">
+          <label for="contrasena">Contraseña</label>
+          <div class="input-wrap">
+            <input [type]="mostrarPassword ? 'text' : 'password'" id="contrasena" name="contrasena"
+              [(ngModel)]="credenciales.contrasena" placeholder="••••••••" required autocomplete="current-password"
+              aria-describedby="contrasena-error">
+            <button type="button" class="toggle-pass" aria-controls="contrasena" [attr.aria-pressed]="mostrarPassword"
+              [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              (click)="alternarPassword()">
+              {{ mostrarPassword ? 'Ocultar' : 'Mostrar' }}
+            </button>
           </div>
-          <div class="field">
-            <label for="contrasena">Contraseña</label>
-            <div class="input-wrap">
-              <input type="password" id="contrasena" name="contrasena" [(ngModel)]="credenciales.contrasena" placeholder="••••••••" required
-                autocomplete="current-password" aria-describedby="contrasena-error">
-              <button type="button" class="toggle-pass" aria-controls="contrasena" aria-pressed="false" aria-label="Mostrar contraseña">Mostrar</button>
-            </div>
-            <small class="field-error" id="contrasena-error"></small>
-          </div>
+          <small class="field-error" id="contrasena-error"></small>
+        </div>
 
-          <div class="form-row-between">
-            <label class="checkbox-line"><input type="checkbox" id="recordar"> Recordarme</label>
-            <a href="#" class="link-pen">¿Olvidaste tu contraseña?</a>
-          </div>
+        <div class="form-row-between">
+          <label class="checkbox-line"><input type="checkbox" id="recordar"> Recordarme</label>
+          <a href="#" class="link-pen">¿Olvidaste tu contraseña?</a>
+        </div>
 
-          <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
-        </form>
+        <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
+      </form>
 
-        <p class="auth-switch">¿No tienes cuenta? <a href="registro" class="link-pen">Regístrate aquí</a></p>
-      </div>
+      <p class="auth-switch">¿No tienes cuenta? <a href="registro" class="link-pen">Regístrate aquí</a></p>
     </div>
   </div>
+</div>
 
-    <!-- MODAL PERSONALIZADO DINÁMICO -->
+<!-- MODAL PERSONALIZADO DINÁMICO -->
 @if (modalVisible) {
-<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(2px);">
-  
-  <div style="background: white; padding: 25px; border-radius: 8px; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center;">
+<div
+  style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(2px);">
+
+  <div
+    style="background: white; padding: 25px; border-radius: 8px; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center;">
     <h3 style="margin-top: 0; color: #2c3e50;">{{ modalTitulo }}</h3>
     <p style="color: #555; margin-bottom: 25px; font-size: 15px; line-height: 1.5;">{{ modalMensaje }}</p>
 
     <div style="display: flex; justify-content: center; gap: 15px;">
-      
+
       <!-- Botón para modo "Alerta" (Solo OK) -->
       @if (modalTipo === 'alerta') {
-        <button (click)="cerrarModal()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100px;">
-          OK
-        </button>
-      } 
-      
+      <button (click)="cerrarModal()"
+        style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100px;">
+        OK
+      </button>
+      }
+
       <!-- Botones para modo "Confirmación" (Sí / No) -->
       @else {
-        <button (click)="ejecutarConfirmacion()" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-          Sí, continuar
-        </button>
-        <button (click)="cerrarModal()" style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-          Cancelar
-        </button>
+      <button (click)="ejecutarConfirmacion()"
+        style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+        Sí, continuar
+      </button>
+      <button (click)="cerrarModal()"
+        style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+        Cancelar
+      </button>
       }
 
     </div>
