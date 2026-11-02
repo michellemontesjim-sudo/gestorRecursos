@@ -1,0 +1,58 @@
+/* ---------- Encabezado del dashboard ---------- */
+.dash-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.dash-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 14px 24px;
+}
+
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dash-user-name {
+  font-size: 0.9rem;
+  color: var(--ink-light);
+}
+
+.dash-intro {
+  padding-top: 40px;
+  padding-bottom: 28px;
+}
+
+.dash-intro .kicker {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--pen);
+  margin: 0 0 6px;
+}
+
+.dash-intro h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  margin: 0 0 8px;
+}
+
+.dash-intro p:last-child {
+  color: var(--ink-light);
+  margin: 0;
+  max-width: 56ch;
+}
+
+@media (max-width: 520px) {
+  .dash-user-name { display: none; }
+}

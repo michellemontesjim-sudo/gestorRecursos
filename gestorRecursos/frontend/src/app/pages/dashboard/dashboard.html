@@ -1,3 +1,21 @@
+<header class="dash-header">
+  <div class="dash-bar">
+    <a routerLink="/" class="brand"><span class="tab"></span>Apunta</a>
+    <div class="dash-user">
+      @if (nombreUsuario) {
+      <span class="dash-user-name">{{ nombreUsuario }}</span>
+      }
+      <button type="button" class="btn btn-ghost" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </div>
+</header>
+
+<section class="dash-intro wrap">
+  <p class="kicker">Tu espacio de estudio</p>
+  <h1>Hola{{ primerNombre ? ', ' + primerNombre : '' }}</h1>
+  <p>Elige una materia para ver sus apuntes, califica lo que usaste o comparte uno nuevo.</p>
+</section>
+
 <div class="crear-materia-container"
   style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
   <h3>Agregar nueva Asignatura</h3>
@@ -166,8 +184,6 @@
     </button>
   </form>
 </div>
-
-<button (click)="cerrarSesion()" class="btn btn-ghost">Cerrar sesión</button>
 
 <!-- MODAL PERSONALIZADO DINÁMICO -->
 @if (modalVisible) {

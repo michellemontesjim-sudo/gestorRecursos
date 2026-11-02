@@ -1,12 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -26,7 +26,18 @@ export class DashboardComponent implements OnInit {
     private cdr: ChangeDetectorRef 
   ) {}
 
+  // Nombre del usuario en sesión, para el saludo del encabezado
+  nombreUsuario: string = '';
+
+  get primerNombre(): string {
+    return this.nombreUsuario.split(' ')[0];
+  }
+
   ngOnInit() {
+    const usuarioGuardado = localStorage.getItem('usuarioLogueado');
+    if (usuarioGuardado) {
+      this.nombreUsuario = JSON.parse(usuarioGuardado).nombre || '';
+    }
     this.cargarMaterias();
   }
 
