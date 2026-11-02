@@ -56,3 +56,333 @@
 @media (max-width: 520px) {
   .dash-user-name { display: none; }
 }
+
+/* ---------- Distribución: contenido + columna lateral ---------- */
+.dash-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 32px;
+  align-items: start;
+  padding-bottom: 64px;
+}
+
+.dash-main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+}
+
+.dash-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dash-section-head h2,
+.visor-head h2,
+.panel h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  margin: 0;
+}
+
+.dash-section-head h2 { font-size: 1.5rem; }
+
+.dash-count {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+}
+
+.dash-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: var(--ink-light);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+}
+
+/* ---------- Tarjetas de materia ---------- */
+.materias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.materia-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--folder);
+  border-radius: var(--radius);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.materia-card:hover { box-shadow: 0 6px 16px -10px rgba(27,42,74,0.35); }
+
+/* Materia abierta en el visor: se marca como la pestaña de una carpeta */
+.materia-card.is-selected {
+  border-color: var(--ink);
+  border-left-color: var(--ink);
+}
+
+.materia-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 8px 16px 16px;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.materia-nombre {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+
+.materia-semestre {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+}
+
+.materia-actions {
+  display: flex;
+  gap: 2px;
+  padding: 8px 8px 0 0;
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  color: var(--ink-light);
+  cursor: pointer;
+}
+.icon-btn:hover { background: rgba(27,42,74,0.08); color: var(--ink); }
+.icon-btn-danger:hover { background: rgba(178,58,46,0.1); color: var(--pen); }
+
+/* ---------- Visor de apuntes ---------- */
+.visor {
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.visor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.visor-head .kicker {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--pen);
+  margin: 0 0 4px;
+}
+
+.visor-head h2 { font-size: 1.4rem; }
+
+.doc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.doc:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.doc-info { flex: 1; min-width: 200px; }
+
+.doc-titulo {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+
+.doc-meta,
+.doc-rating {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-light);
+}
+
+.doc-rating { margin-top: 4px; }
+
+.doc-rating .mark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--pen);
+}
+
+.doc-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 0.85rem;
+}
+
+.btn-danger {
+  background: var(--pen);
+  color: var(--card);
+}
+.btn-danger:hover { background: #962f25; }
+
+/* Formulario de valoración desplegable */
+.valorar {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(217,164,65,0.14);
+  border-left: 3px solid var(--folder);
+  border-radius: var(--radius);
+}
+
+.valorar label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.valorar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.valorar select {
+  flex: 1;
+  min-width: 180px;
+  padding: 7px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-family: var(--sans);
+  color: var(--ink);
+}
+
+/* ---------- Columna lateral (formularios) ---------- */
+.dash-side {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+
+.panel h2 {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.panel-desc {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: var(--ink-light);
+}
+
+.panel form { margin-top: 12px; }
+
+.panel input[type="file"] {
+  padding: 9px 10px;
+  font-size: 0.85rem;
+}
+
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ---------- Modal ---------- */
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(27,42,74,0.55);
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  border-top: 4px solid var(--folder);
+  border-radius: var(--radius);
+  padding: 26px;
+  box-shadow: 0 18px 40px -16px rgba(27,42,74,0.5);
+}
+
+.modal h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.35rem;
+  margin: 0 0 8px;
+}
+
+.modal p {
+  margin: 0 0 24px;
+  line-height: 1.5;
+  color: var(--ink-light);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .dash-layout { grid-template-columns: 1fr; }
+  .dash-side { position: static; }
+}
+
+@media (max-width: 520px) {
+  .visor { padding: 18px; }
+  .doc-actions { width: 100%; }
+  .doc-actions .btn { flex: 1; }
+}
