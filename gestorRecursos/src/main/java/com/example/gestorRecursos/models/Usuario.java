@@ -1,12 +1,15 @@
 package com.example.gestorRecursos.models; // Ajusta el paquete si es necesario
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "Usuario")
 public class Usuario {
 
-    @Id
+    /*@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idUsuario")
     private Long idUsuario;
@@ -19,9 +22,23 @@ public class Usuario {
 
     // Enlaza la variable segura con la columna real de tu base de datos
     @Column(name = "contraseña", nullable = false)
-    private String contrasena;
+    private String contrasena;*/
 
-    // El campo fecha_registro no se pone aquí porque MySQL lo llena automáticamente con DEFAULT CURRENT_TIMESTAMP
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idUsuario;
+
+    @NotBlank(message = "El nombre es obligatorio")
+    private String nombre;
+
+    @NotBlank(message = "El correo es obligatorio")
+    @Email(message = "Debe ser un formato de correo válido")
+    private String correo;
+
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    @Column(name = "contraseña", nullable = false)
+    private String contrasena;
 
     public Usuario() {}
 
