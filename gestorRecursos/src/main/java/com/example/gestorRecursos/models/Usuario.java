@@ -1,5 +1,8 @@
 package com.example.gestorRecursos.models; // Ajusta el paquete si es necesario
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -37,8 +40,20 @@ public class Usuario {
 
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "contraseña", nullable = false)
     private String contrasena;
+
+    @JsonIgnore
+    private String resetToken;
+
+    @JsonIgnore
+    private LocalDateTime resetTokenExpiracion;
+
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+    public LocalDateTime getResetTokenExpiracion() { return resetTokenExpiracion; }
+    public void setResetTokenExpiracion(LocalDateTime resetTokenExpiracion) { this.resetTokenExpiracion = resetTokenExpiracion; }
 
     public Usuario() {}
 

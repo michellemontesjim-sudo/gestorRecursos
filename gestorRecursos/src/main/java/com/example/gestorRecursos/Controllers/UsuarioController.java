@@ -1,5 +1,6 @@
 package com.example.gestorRecursos.Controllers;
-
+import java.util.Map;
+import com.example.gestorRecursos.dto.LoginResponseDTO;
 import com.example.gestorRecursos.models.Usuario;
 import com.example.gestorRecursos.services.UsuarioService;
 import jakarta.validation.Valid;
@@ -35,10 +36,11 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody Usuario credenciales) {
         try {
-            Usuario usuarioAutenticado = usuarioService.autenticarUsuario(credenciales);
-            return ResponseEntity.ok(usuarioAutenticado); 
+            LoginResponseDTO respuesta = usuarioService.autenticarUsuario(credenciales);
+            return ResponseEntity.ok(respuesta);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"error\": \"" + e.getMessage() + "\"}");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -66,9 +68,29 @@ public class UsuarioController {
         }
     }
 
-    // Importaciones extra que debes poner arriba del todo:
-    // import org.springframework.web.bind.MethodArgumentNotValidException;
-    // import org.springframework.validation.FieldError;
+    @PostMapping("/olvide-contrasena")
+    public ResponseEntity<?> olvideContrasena(@RequestBody Map<String, String> body) {
+        try {
+            usuarioService.solicitarRecuperacion(body.get("correo"));
+            return ResponseEntity.ok(Map.of("mensaje", "Te enviamos un código de 6 dígitos a tu correo."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/restablecer-contrasena")
+    public ResponseEntity<?> restablecerContrasena(@RequestBody Map<String, String> body) {
+        try {
+            usuarioService.restablecerContrasena(
+                    body.get("correo"),
+                    body.get("codigo"),
+                    body.get("nuevaContrasena")
+            );
+            return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada. Ya puedes iniciar sesión."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
 
     // Pega esto al final de tu UsuarioController:
     @ExceptionHandler(MethodArgumentNotValidException.class)

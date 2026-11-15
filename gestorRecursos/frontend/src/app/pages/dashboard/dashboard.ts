@@ -347,8 +347,15 @@ export class DashboardComponent implements OnInit {
     this.documentosMateria = [];
   }
 
-  cerrarSesion() {
+  /*cerrarSesion() {
     localStorage.removeItem('usuarioLogueado');
+    this.router.navigate(['/login']);
+  }*/
+  cerrarSesion(): void {
+    // 1. Borramos el token JWT y los datos de sesión
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuarioLogueado');
+
     this.router.navigate(['/login']);
   }
 
