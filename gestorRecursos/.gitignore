@@ -32,3 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 .env
+
+### Archivos locales que no deben subirse ###
+# Archivos de prueba subidos desde el backend (ahora los archivos van a Cloudinary)
+uploads/
+# Archivos que macOS crea en cada carpeta
+.DS_Store
