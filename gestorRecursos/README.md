@@ -68,12 +68,16 @@ Antes de levantar el proyecto en tu máquina local, asegúrate de tener instalad
 No uses Spring Boot para generar las tablas. Debes crear la estructura localmente:
 1. Abre MySQL Workbench.
 2. Copia el contenido del archivo `database_schema.sql` (ubicado en la carpeta del backend llamada recursosScriptsBD).
-3. Ejecuta el script. Esto creará el esquema `gestorRecursos_db` y las tablas (`Usuario`, `Asignatura`, `Documento`, `Valoracion`).
+3. Si aún no existe, crea primero la base de datos con `CREATE DATABASE gestorRecursos_db;` (el script no la crea, solo la usa).
+4. Ejecuta el script. Esto creará las tablas (`Usuario`, `Asignatura`, `Documento`, `Valoracion`).
 
 ### 2. Configurar el Backend (Spring Boot)
 1. Asegúrate de tener una base de datos MySQL local creada con el nombre del proyecto.
-2. Verifica las credenciales de tu BD en el archivo `application.properties`.
-3. **Importante:** Verifica que la ruta de la carpeta de subidas (`uploads`) especificada en el controlador coincida con la ruta absoluta o relativa de tu entorno local.
+2. Configura las variables de entorno. Las credenciales **no se escriben en el código**: el backend las lee de un archivo `.env` que cada persona crea en su computador y que no se sube a GitHub.
+   - En la carpeta del backend (donde está `pom.xml`), copia la plantilla: `cp .env.example .env`
+   - Abre `.env` y reemplaza los valores: tu contraseña de MySQL, las claves de Cloudinary y del correo (pídelas al equipo por privado) y una clave de mínimo 32 caracteres para `JWT_SECRET`.
+   - Si falta alguna variable, el backend no arranca y muestra un error como `Could not resolve placeholder`.
+3. **Importante:** Los archivos subidos se guardan en Cloudinary, por eso las variables `CLOUDINARY_*` son obligatorias para subir apuntes.
 4. Ejecuta el proyecto, se puede usar el botón "Run" en `GestorRecursosApplication.java` o el comando `.\mvnw spring-boot:run`.
 5. Verifica que el servidor funciona entrando en tu navegador a: `http://localhost:8080/api/health`
 
