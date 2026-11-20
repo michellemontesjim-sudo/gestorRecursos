@@ -115,3 +115,8 @@ ALTER TABLE Documento
   ADD COLUMN nombreArchivoOriginal VARCHAR(300) NOT NULL,
   ADD COLUMN pesoArchivo BIGINT NOT NULL,
   ADD COLUMN tipoArchivo VARCHAR(100) NOT NULL;
+
+-- Columnas para la recuperación de contraseña (resetToken del modelo Usuario)
+ALTER TABLE Usuario
+  ADD COLUMN resetToken VARCHAR(255) NULL,
+  ADD COLUMN resetTokenExpiracion DATETIME NULL;
