@@ -51,7 +51,7 @@
             <label for="confirmar">Confirmar contraseña</label>
             <div class="input-wrap">
               <input [type]="mostrarConfirmar ? 'text' : 'password'" id="confirmar" name="confirmar"
-                [(ngModel)]="confirmarContrasena" placeholder="••••••••" required minlength="8"
+                [(ngModel)]="confirmarContrasena" placeholder="••••••••" autocomplete="new-password" required minlength="8"
                 autocomplete="new-password" aria-describedby="confirmar-error">
               <button type="button" class="toggle-pass" aria-controls="confirmar" [attr.aria-pressed]="mostrarConfirmar"
                 [attr.aria-label]="mostrarConfirmar ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'"
@@ -95,7 +95,7 @@
       @if (modalTipo === 'alerta') {
       <button (click)="cerrarModal()"
         style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100px;">
-        OK
+        OK 
       </button>
       }
 

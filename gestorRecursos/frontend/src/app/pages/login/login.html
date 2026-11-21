@@ -85,11 +85,12 @@
           <h1>Nueva contraseña</h1>
           <p>Ingresa el código de 6 dígitos que enviamos a <strong>{{ datosRecuperar.correo }}</strong>.</p>
 
-          <form (ngSubmit)="confirmarNuevaContrasena()">
+          <form (ngSubmit)="confirmarNuevaContrasena()" autocomplete="off">
             <div class="field">
               <label for="rec-codigo">Código de verificación</label>
               <input type="text" id="rec-codigo" name="recCodigo" [(ngModel)]="datosRecuperar.codigo"
-                placeholder="Ej. 482910" maxlength="6" inputmode="numeric" required>
+                placeholder="Ej. 482910" maxlength="6" inputmode="numeric" required
+                autocomplete="one-time-code" required>
             </div>
 
             <div class="field">

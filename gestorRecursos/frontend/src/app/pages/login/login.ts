@@ -76,6 +76,8 @@ export class LoginComponent {
     }).subscribe({
       next: (res) => {
         this.enviandoCodigo = false;
+        this.datosRecuperar.codigo = '';
+        this.datosRecuperar.nuevaContrasena = '';
         this.pasoRecuperar = 2;
         this.mostrarAlerta('Código Enviado', res.mensaje);
         this.cdr.detectChanges();
