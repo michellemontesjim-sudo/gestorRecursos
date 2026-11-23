@@ -92,7 +92,6 @@ public class UsuarioController {
         }
     }
 
-    // Pega esto al final de tu UsuarioController:
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> manejarErroresDeValidacion(MethodArgumentNotValidException ex) {
         StringBuilder errores = new StringBuilder();

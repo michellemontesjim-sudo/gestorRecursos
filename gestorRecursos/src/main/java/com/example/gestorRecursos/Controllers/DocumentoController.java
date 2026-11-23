@@ -40,18 +40,4 @@ public class DocumentoController {
         return ResponseEntity.ok(documentoService.obtenerPorAsignatura(idAsignatura));
     }
 
-    /*@GetMapping("/descargar/{nombreArchivo}")
-    public ResponseEntity<?> descargarArchivo(@PathVariable String nombreArchivo) {
-        try {
-            // Delega la búsqueda física al Servicio
-            Resource recurso = documentoService.cargarArchivoParaDescarga(nombreArchivo);
-            
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(recurso);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"" + e.getMessage() + "\"}");
-        }
-    }*/ 
 }

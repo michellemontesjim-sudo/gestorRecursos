@@ -13,7 +13,7 @@ public class LoginResponseDTO {
         this.correo = correo;
     }
 
-    // Getters y Setters
+
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
     public Long getIdUsuario() { return idUsuario; }

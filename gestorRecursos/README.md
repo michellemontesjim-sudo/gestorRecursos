@@ -8,32 +8,32 @@
 Problema real, objetivos específicos, alcance, diagramas y base de datos en
 el PDF "Definición_alcance y modelo de datos" ubicado en el repositorio avanceFrontend.
 
+**Despliegue Frontend (Producción):** [https://gestor-recursos.vercel.app]
+
+
 # Gestor de Recursos Universitarios (Apunta)
 
 Este proyecto es una plataforma web full-stack diseñada para compartir y organizar material de estudio universitario (resúmenes, parciales pasados, guías). Permite a los estudiantes registrarse, subir documentos clasificados por asignatura y calificar los aportes de la comunidad.
 
-## Novedades del Segundo Avance
 
-En esta fase, el proyecto evolucionó de un prototipo a una aplicación completamente funcional, integrando el backend con el frontend y añadiendo persistencia de archivos físicos.
-
-### 1. Gestión de Archivos y Metadatos (Backend)
-* **Subida de Archivos:** Implementación de `MultipartFile` en Spring Boot para almacenar documentos (PDFs, Word) directamente en el disco duro del servidor (carpeta `uploads`).
-* **Sincronización con MySQL:** Extracción automática de metadatos del archivo físico (peso en bytes, tipo MIME, nombre original) para su persistencia estructurada en la base de datos.
-* **Descarga Segura:** Rutas API configuradas con `HttpHeaders.CONTENT_DISPOSITION` para forzar la descarga nativa de archivos a través del navegador.
+### 1. Gestión de Archivos y Persistencia Dual (Backend)
+* **Almacenamiento en la Nube (Cloudinary):** Recepción de archivos mediante `MultipartFile` en Spring Boot y subida segura a Cloudinary CDN generando identificadores únicos y URLs HTTPS persistentes.
+* **Sincronización con MySQL:** Extracción automática de metadatos del archivo (peso en bytes, tipo MIME, nombre original, URL de descarga) vinculados relacionalmente con usuario y asignatura.
+* **Seguridad Stateless y Recuperación OTP:** Autenticación basada en tokens **JWT**, contraseñas cifradas con **BCrypt** y flujo de recuperación de contraseña mediante códigos temporales (OTP) enviados por correo SMTP (`JavaMailSender`).
 
 ### 2. Interfaz Dinámica con Angular 17+ (Frontend)
-* **Migración de Vanilla JS a Angular:** Se reemplazó la manipulación manual del DOM y validaciones en JavaScript puro por el sistema de *Data Binding* (`ngModel`) y directivas modernas de Angular (`@for`, `@if`).
-* **Manejo de Formularios Multmedia:** Uso del objeto nativo `FormData` para empaquetar y transmitir archivos binarios junto con datos relacionales (IDs de asignatura y usuario) mediante `HttpClient`.
-* **Validaciones de Seguridad:** Validación en tiempo real y protección contra envíos múltiples en las valoraciones.
+* **Arquitectura SPA:** Componentes standalone con enrutamiento protegido (`authGuard`), interceptores HTTP para envío automático del token (`authInterceptor`) y soporte de recarga en producción (`vercel.json`).
+* **Manejo de Formularios Multimedia:** Uso de `FormData` para empaquetar y transmitir archivos binarios junto con datos relacionales mediante `HttpClient`.
+* **Validaciones de Seguridad:** Control en tiempo real de formularios, atributos `autocomplete` endurecidos y protección contra envíos múltiples.
 
 ### 3. Experiencia de Usuario (UI/UX)
-* **Sistema de Modales Personalizado:** Sustitución completa de las alertas bloqueantes del navegador (`alert()`, `confirm()`) por componentes modales asíncronos y dinámicos construidos en Angular.
-* **Renderizado Inmediato:** Implementación de `ChangeDetectorRef` para forzar el repintado de la pantalla al instante tras recibir respuestas asíncronas del servidor.
-* **Visor Interactivo:** Tarjetas de asignaturas clickeables que despliegan en tiempo real los documentos disponibles y su respectivo promedio de calificación.
+* **Sistema de Modales Personalizado:** Sustitución completa de alertas bloqueantes del navegador (`alert()`, `confirm()`) por modales asíncronos y dinámicos.
+* **Renderizado Inmediato:** Uso de `ChangeDetectorRef` para actualizar vistas al instante tras recibir respuestas del servidor.
+* **Visor Interactivo:** Tarjetas de asignaturas que despliegan en tiempo real los documentos disponibles y su promedio de calificación.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 **Frontend:**
 * Angular (v17+)
@@ -70,6 +70,18 @@ No uses Spring Boot para generar las tablas. Debes crear la estructura localment
 2. Copia el contenido del archivo `database_schema.sql` (ubicado en la carpeta del backend llamada recursosScriptsBD).
 3. Si aún no existe, crea primero la base de datos con `CREATE DATABASE gestorRecursos_db;` (el script no la crea, solo la usa).
 4. Ejecuta el script. Esto creará las tablas (`Usuario`, `Asignatura`, `Documento`, `Valoracion`).
+5. Cargar datos semilla (Seeds) para pruebas: Ejecuta el siguiente script para poblar asignaturas base y un usuario de prueba listo para iniciar sesión:
+ 
+INSERT INTO Asignatura (nombre, semestre) VALUES
+('Ingeniería de Software', 5),
+('Bases de Datos', 4),
+('Estructura de Datos', 3),
+('Cálculo Multivariable', 3);
+
+-- Usuario de prueba (Contraseña en texto plano: Hola12345)
+INSERT INTO Usuario (nombre, correo, contrasena) VALUES
+('Estudiante Prueba', 'prueba@uao.edu.co', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
+Credenciales de acceso rápido: Correo prueba@uao.edu.co | Contraseña Hola12345
 
 ### 2. Configurar el Backend (Spring Boot)
 1. Asegúrate de tener una base de datos MySQL local creada con el nombre del proyecto.
@@ -192,3 +204,4 @@ JSON
 }
 
 DELETE: http://localhost:8080/api/asignaturas/1 (El "1" es el ID de la materia a borrar)
+

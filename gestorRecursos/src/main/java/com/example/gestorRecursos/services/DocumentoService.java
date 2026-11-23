@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class DocumentoService {
@@ -36,7 +37,7 @@ public class DocumentoService {
 
     public Documento guardarDocumentoEnLaNube(MultipartFile archivo, Long idUsuario, Long idAsignatura) throws Exception {
         
-        // 1. Validaciones de seguridad (Mantenemos tu estándar 5.0)
+        // 1. Validaciones de seguridad
         if (archivo.isEmpty()) {
             throw new Exception("El archivo está vacío.");
         }
@@ -49,23 +50,30 @@ public class DocumentoService {
         }
 
         // 2. Subir el archivo a Cloudinary
-        // Configuramos resource_type en "auto" para que acepte PDFs y Words, no solo imágenes
+        String nombreOriginal = archivo.getOriginalFilename();
+        String extension = "";
+        if (nombreOriginal != null && nombreOriginal.contains(".")) {
+            extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
+        }
+        String publicIdConExtension = UUID.randomUUID().toString() + extension;
+
+        // 3. Subir el archivo a Cloudinary incluyendo la extensión en el public_id
         Map uploadResult = cloudinary.uploader().upload(archivo.getBytes(), ObjectUtils.asMap(
                 "resource_type", "auto",
-                "folder", "apunta_documentos" // Se creará esta carpeta en tu Cloudinary
+                "folder", "apunta_documentos",
+                "public_id", publicIdConExtension
         ));
+       
 
         // 3. Obtener el URL público seguro (https) de Cloudinary
         String urlEnLaNube = uploadResult.get("secure_url").toString();
-        String nombreOriginal = archivo.getOriginalFilename();
-
+        
         // 4. Guardar metadatos y el URL en MySQL
         Documento nuevoDocumento = new Documento();
         nuevoDocumento.setIdUsuario(idUsuario);
         nuevoDocumento.setIdAsignatura(idAsignatura);
         nuevoDocumento.setTitulo(nombreOriginal); 
         
-        // Magia: en vez de "miArchivo.pdf", ahora guardamos "https://res.cloudinary.com/.../miArchivo.pdf"
         nuevoDocumento.setRuta_archivo(urlEnLaNube); 
         
         nuevoDocumento.setNombreArchivoOriginal(nombreOriginal);

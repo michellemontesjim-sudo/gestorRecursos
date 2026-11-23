@@ -24,7 +24,7 @@ public class ValoracionService {
 
     public Valoracion crearValoracion(Valoracion nueva) throws Exception {
         try {
-            // Spring Boot intentará guardar. Si tu base de datos (Trigger) rechaza la operación 
+            // Spring Boot intentará guardar. Si la base de datos (Trigger) rechaza la operación 
             // porque el usuario es dueño del documento, atrapará el error aquí.
             return valoracionRepository.save(nueva);
         } catch (Exception e) {
