@@ -3,14 +3,31 @@ import { CanActivateFn, Router } from '@angular/router';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
-  
-  // Verificamos si el usuario inició sesión
-  const sesionActiva = localStorage.getItem('usuarioLogueado');
+  const token = localStorage.getItem('token');
 
-  if (sesionActiva) {
-    return true; // Permite el acceso al Dashboard
-  } else {
-    router.navigate(['/login']); // Lo expulsa de vuelta al login
-    return false; // Bloquea la carga del componente
+  if (!token) {
+    router.navigate(['/login']);
+    return false;
+  }
+
+  try {
+    // Decodificamos el payload (segunda parte del JWT) para revisar la fecha de expiración
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expirado = payload.exp * 1000 < Date.now();
+
+    if (expirado) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuarioLogueado');
+      router.navigate(['/login']);
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    // Si alguien manipuló el token en el navegador, lo bloqueamos
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuarioLogueado');
+    router.navigate(['/login']);
+    return false;
   }
 };

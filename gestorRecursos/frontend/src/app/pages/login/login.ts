@@ -39,20 +39,75 @@ export class LoginComponent {
 
     // Para el login esperamos un objeto JSON con los datos del usuario, no un texto
     this.http.post(urlBackend, this.credenciales).subscribe({
-      next: (usuario: any) => {
-        // 1. Guardamos al usuario en la memoria del navegador (sesión activa)
-        localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
+      next: (respuesta: any) => {
+      localStorage.setItem('token', respuesta.token);
+      localStorage.setItem('usuarioLogueado', JSON.stringify({
+        idUsuario: respuesta.idUsuario,
+        nombre: respuesta.nombre,
+        correo: respuesta.correo
+      }));
+      this.router.navigate(['/dashboard']);
+    },
+      error: (err) => {
+    console.error('Error en login:', err);
 
-        // 2. Lo redirigimos automáticamente a la vista privada
-        this.router.navigate(['/dashboard']);
+    // Extrae el mensaje del JSON de Spring o muestra un respaldo si el servidor no responde
+    const mensaje = err.error?.error 
+      || (typeof err.error === 'string' ? err.error : null) 
+      || 'Correo o contraseña incorrectos.';
+
+    this.mostrarAlerta('Error de Acceso', mensaje);
+    
+    // Fuerza a Angular a renderizar el modal inmediatamente
+    this.cdr.detectChanges(); 
+  }
+    });
+  }
+
+  modoRecuperar = false;
+  pasoRecuperar = 1; // 1: pedir correo, 2: ingresar código y nueva clave
+  datosRecuperar = { correo: '', codigo: '', nuevaContrasena: '' };
+  enviandoCodigo = false;
+
+  solicitarCodigo(): void {
+    this.enviandoCodigo = true;
+    this.http.post<any>('http://localhost:8080/api/usuarios/olvide-contrasena', {
+      correo: this.datosRecuperar.correo
+    }).subscribe({
+      next: (res) => {
+        this.enviandoCodigo = false;
+        this.datosRecuperar.codigo = '';
+        this.datosRecuperar.nuevaContrasena = '';
+        this.pasoRecuperar = 2;
+        this.mostrarAlerta('Código Enviado', res.mensaje);
+        this.cdr.detectChanges();
       },
-      error: (error) => {
-        console.error("Error en login:", error);
-
-        // Reemplazamos el alert() nativo por nuestra alerta personalizada
-        this.mostrarAlerta("Error de Autenticación", "Correo o contraseña incorrectos. Por favor, intenta de nuevo.");
+      error: (err) => {
+        this.enviandoCodigo = false;
+        this.mostrarAlerta('Error', err.error?.error || 'No se pudo enviar el código.');
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  confirmarNuevaContrasena(): void {
+    this.enviandoCodigo = true;
+    this.http.post<any>('http://localhost:8080/api/usuarios/restablecer-contrasena', this.datosRecuperar)
+      .subscribe({
+        next: (res) => {
+          this.enviandoCodigo = false;
+          this.modoRecuperar = false;
+          this.pasoRecuperar = 1;
+          this.datosRecuperar = { correo: '', codigo: '', nuevaContrasena: '' };
+          this.mostrarAlerta('¡Listo!', res.mensaje);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.enviandoCodigo = false;
+          this.mostrarAlerta('Error', err.error?.error || 'No se pudo actualizar la contraseña.');
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   // --- FUNCIONES DEL MODAL ---

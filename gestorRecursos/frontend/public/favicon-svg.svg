@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Pestaña mostaza con esquinas superiores redondeadas y base recta -->
+  <path d="M2 10 Q2 6 6 6 H26 Q30 6 30 10 V27 H2 Z" fill="#D49B35" />
+  <!-- Línea horizontal oscura interior -->
+  <rect x="7" y="11" width="18" height="2" rx="1" fill="#7D622D" />
+</svg>

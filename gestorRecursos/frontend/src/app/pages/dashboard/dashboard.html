@@ -95,8 +95,7 @@
 
         <div class="doc-actions">
           <button type="button" class="btn btn-ghost btn-sm" (click)="abrirFormularioValoracion(doc)">Calificar</button>
-          <a class="btn btn-primary btn-sm" [href]="'http://localhost:8080/api/documentos/descargar/' + doc.ruta_archivo"
-            target="_blank" rel="noopener">Descargar</a>
+          <a [href]="doc.ruta_archivo" target="_blank">Ver Apunte</a>
         </div>
 
         <!-- Formulario de valoración (solo para el documento elegido) -->

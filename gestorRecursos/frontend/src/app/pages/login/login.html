@@ -12,44 +12,110 @@
   <div class="auth-main">
     <div class="auth-card">
       <a href="inicio" class="brand brand-mobile"><span class="tab"></span>Apunta</a>
-      <p class="kicker">Bienvenido de nuevo</p>
-      <h1>Inicia sesión</h1>
-      <p>Entra para descargar y subir material de tus materias.</p>
 
-      <div class="form-status ok" id="formStatus" role="status" aria-live="polite">Inicio de sesión simulado — aún no
-        hay backend conectado.</div>
+      <!-- VISTA 1: INICIO DE SESIÓN NORMAL -->
+      @if (!modoRecuperar) {
+        <p class="kicker">Bienvenido de nuevo</p>
+        <h1>Inicia sesión</h1>
+        <p>Entra para descargar y subir material de tus materias.</p>
 
-      <form id="loginForm" (ngSubmit)="iniciarSesion()">
-        <div class="field">
-          <label for="correo">Correo institucional</label>
-          <input type="email" id="correo" name="correo" [(ngModel)]="credenciales.correo"
-            placeholder="nombre@uao.edu.co" required autocomplete="email" aria-describedby="correo-error">
-          <small class="field-error" id="correo-error"></small>
-        </div>
-        <div class="field">
-          <label for="contrasena">Contraseña</label>
-          <div class="input-wrap">
-            <input [type]="mostrarPassword ? 'text' : 'password'" id="contrasena" name="contrasena"
-              [(ngModel)]="credenciales.contrasena" placeholder="••••••••" required autocomplete="current-password"
-              aria-describedby="contrasena-error">
-            <button type="button" class="toggle-pass" aria-controls="contrasena" [attr.aria-pressed]="mostrarPassword"
-              [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              (click)="alternarPassword()">
-              {{ mostrarPassword ? 'Ocultar' : 'Mostrar' }}
-            </button>
+        <form id="loginForm" (ngSubmit)="iniciarSesion()">
+          <div class="field">
+            <label for="correo">Correo institucional</label>
+            <input type="email" id="correo" name="correo" [(ngModel)]="credenciales.correo"
+              placeholder="nombre@uao.edu.co" required autocomplete="email" aria-describedby="correo-error">
+            <small class="field-error" id="correo-error"></small>
           </div>
-          <small class="field-error" id="contrasena-error"></small>
-        </div>
 
-        <div class="form-row-between">
-          <label class="checkbox-line"><input type="checkbox" id="recordar"> Recordarme</label>
-          <a href="#" class="link-pen">¿Olvidaste tu contraseña?</a>
-        </div>
+          <div class="field">
+            <label for="contrasena">Contraseña</label>
+            <div class="input-wrap">
+              <input [type]="mostrarPassword ? 'text' : 'password'" id="contrasena" name="contrasena"
+                [(ngModel)]="credenciales.contrasena" placeholder="••••••••" required autocomplete="current-password"
+                aria-describedby="contrasena-error">
+              <button type="button" class="toggle-pass" aria-controls="contrasena" [attr.aria-pressed]="mostrarPassword"
+                [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                (click)="alternarPassword()">
+                {{ mostrarPassword ? 'Ocultar' : 'Mostrar' }}
+              </button>
+            </div>
+            <small class="field-error" id="contrasena-error"></small>
+          </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
-      </form>
+          <div class="form-row-between">
+            <label class="checkbox-line"><input type="checkbox" id="recordar"> Recordarme</label>
+            <a href="#" class="link-pen" (click)="$event.preventDefault(); modoRecuperar = true">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
 
-      <p class="auth-switch">¿No tienes cuenta? <a href="registro" class="link-pen">Regístrate aquí</a></p>
+          <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
+        </form>
+
+        <p class="auth-switch">¿No tienes cuenta? <a href="registro" class="link-pen">Regístrate aquí</a></p>
+      }
+
+      <!-- VISTA 2: RECUPERACIÓN DE CONTRASEÑA -->
+      @else {
+        @if (pasoRecuperar === 1) {
+          <p class="kicker">Recuperación de cuenta</p>
+          <h1>¿Olvidaste tu clave?</h1>
+          <p>Ingresa tu correo institucional y te enviaremos un código de 6 dígitos.</p>
+
+          <form (ngSubmit)="solicitarCodigo()">
+            <div class="field">
+              <label for="rec-correo">Correo institucional</label>
+              <input type="email" id="rec-correo" name="recCorreo" [(ngModel)]="datosRecuperar.correo"
+                placeholder="nombre@uao.edu.co" required autocomplete="email">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" [disabled]="enviandoCodigo">
+              {{ enviandoCodigo ? 'Enviando código...' : 'Enviar código' }}
+            </button>
+          </form>
+
+          <p class="auth-switch">
+            ¿Recordaste tu contraseña?
+            <a href="#" class="link-pen" (click)="$event.preventDefault(); modoRecuperar = false">Volver al login</a>
+          </p>
+        }
+
+        @else {
+          <p class="kicker">Verificación de seguridad</p>
+          <h1>Nueva contraseña</h1>
+          <p>Ingresa el código de 6 dígitos que enviamos a <strong>{{ datosRecuperar.correo }}</strong>.</p>
+
+          <form (ngSubmit)="confirmarNuevaContrasena()" autocomplete="off">
+            <div class="field">
+              <label for="rec-codigo">Código de verificación</label>
+              <input type="text" id="rec-codigo" name="recCodigo" [(ngModel)]="datosRecuperar.codigo"
+                placeholder="Ej. 482910" maxlength="6" inputmode="numeric" required
+                autocomplete="one-time-code" required>
+            </div>
+
+            <div class="field">
+              <label for="rec-clave">Nueva contraseña</label>
+              <div class="input-wrap">
+                <input [type]="mostrarPassword ? 'text' : 'password'" id="rec-clave" name="recClave"
+                  [(ngModel)]="datosRecuperar.nuevaContrasena" placeholder="Mínimo 8 caracteres" required>
+                <button type="button" class="toggle-pass" (click)="alternarPassword()">
+                  {{ mostrarPassword ? 'Ocultar' : 'Mostrar' }}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" [disabled]="enviandoCodigo">
+              {{ enviandoCodigo ? 'Actualizando...' : 'Cambiar contraseña' }}
+            </button>
+          </form>
+
+          <p class="auth-switch">
+            ¿No llegó el correo?
+            <a href="#" class="link-pen" (click)="$event.preventDefault(); pasoRecuperar = 1">Reintentar</a>
+          </p>
+        }
+      }
+
     </div>
   </div>
 </div>

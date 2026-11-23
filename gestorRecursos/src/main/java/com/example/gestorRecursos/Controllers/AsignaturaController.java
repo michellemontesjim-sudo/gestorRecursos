@@ -1,7 +1,7 @@
 package com.example.gestorRecursos.Controllers;
 
 import com.example.gestorRecursos.models.Asignatura;
-import com.example.gestorRecursos.repositories.AsignaturaRepository;
+import com.example.gestorRecursos.services.AsignaturaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,61 +12,49 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/asignaturas")
-@CrossOrigin(origins = "http://localhost:4200") // Permiso para tu Angular
+@CrossOrigin(origins = "http://localhost:4200")
 public class AsignaturaController {
 
     @Autowired
-    private AsignaturaRepository asignaturaRepository;
+    private AsignaturaService asignaturaService;
 
     @GetMapping
     public ResponseEntity<List<Asignatura>> obtenerTodas() {
-        List<Asignatura> asignaturas = asignaturaRepository.findAll();
-        return ResponseEntity.ok(asignaturas); // Devuelve un código 200 OK con la lista
+        return ResponseEntity.ok(asignaturaService.obtenerTodas());
     }
 
-    // GET por ID - Código 200 OK (o 404 Not Found)
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerAsignaturaPorId(@PathVariable Long id) {
-        Optional<Asignatura> asignatura = asignaturaRepository.findById(id);
-        
+        Optional<Asignatura> asignatura = asignaturaService.obtenerPorId(id);
         if (asignatura.isPresent()) {
-            // Devuelve un 200 OK con el JSON de la asignatura encontrada
-            return ResponseEntity.ok(asignatura.get()); 
-        } else {
-            // Devuelve un 404 Not Found si el ID no existe
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                 .body("{\"error\": \"Asignatura no encontrada.\"}");
+            return ResponseEntity.ok(asignatura.get());
         }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Asignatura no encontrada.\"}");
     }
 
     @PostMapping
     public ResponseEntity<Asignatura> crearAsignatura(@RequestBody Asignatura nuevaAsignatura) {
-        // Guardamos la materia en la base de datos
-        Asignatura guardada = asignaturaRepository.save(nuevaAsignatura);
-        // Devolvemos la materia ya creada (con su ID generado) a Angular
-        return ResponseEntity.ok(guardada);
+        // Retornamos 201 CREATED que es la mejor práctica REST para la creación de un recurso
+        return ResponseEntity.status(HttpStatus.CREATED).body(asignaturaService.crearAsignatura(nuevaAsignatura));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarAsignatura(@PathVariable Long id, @RequestBody Asignatura detallesMateria) {
+        try {
+            Asignatura actualizada = asignaturaService.actualizarAsignatura(id, detallesMateria);
+            return ResponseEntity.ok(actualizada);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarAsignatura(@PathVariable Long id) {
-        asignaturaRepository.deleteById(id);
-        return ResponseEntity.ok().build(); // Responde 200 OK cuando se elimina con éxito
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Asignatura> actualizarAsignatura(@PathVariable Long id, @RequestBody Asignatura detallesMateria) {
-        
-        Optional<Asignatura> materiaExistente = asignaturaRepository.findById(id);
-        
-        if (materiaExistente.isPresent()) {
-            Asignatura materia = materiaExistente.get();
-            materia.setNombre(detallesMateria.getNombre());
-            materia.setSemestre(detallesMateria.getSemestre());
-            
-            Asignatura actualizada = asignaturaRepository.save(materia);
-            return ResponseEntity.ok(actualizada);
-        } else {
-            return ResponseEntity.notFound().build();
+        try {
+            asignaturaService.eliminarAsignatura(id);
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 }

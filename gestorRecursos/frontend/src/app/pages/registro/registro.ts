@@ -43,25 +43,26 @@ export class RegistroComponent {
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   registrar() {
-    // URL de tu controlador en Spring Boot
+
     const urlBackend = 'http://localhost:8080/api/usuarios/registro';
 
     // 4. Hacemos la petición POST
     this.http.post(urlBackend, this.nuevoUsuario, { responseType: 'text' }).subscribe({
       next: (respuesta) => {
         console.log("Respuesta del servidor:", respuesta);
-
-        // Reemplazamos el alert() nativo
-        this.mostrarAlerta("¡Registro Exitoso!", "¡Tu cuenta ha sido creada exitosamente! Ya puedes iniciar sesión.");
-
-        // Limpiamos el formulario
+        this.confirmarContrasena = '';
+        this.mostrarConfirmar = false;
+        this.mostrarAlerta("¡Registro Exitoso!", "¡Tu cuenta ha sido creada exitosamente! Ya puedes iniciar sesión."); 
         this.nuevoUsuario = { nombre: '', correo: '', contrasena: '' };
       },
-      error: (error) => {
-        console.error("Error del servidor:", error);
-
-        // Reemplazamos el alert() nativo
-        this.mostrarAlerta("Error de Registro", "No se pudo registrar. Es posible que el correo ya esté registrado.");
+      error: (err) => {
+        console.error("Error del servidor:", err);
+        
+        // Atrapamos el mensaje real que nos manda el @ExceptionHandler de Spring Boot
+        const mensajeReal = err.error ? err.error : "No se pudo registrar. Verifica tus datos.";
+        
+        // Mostramos el error real en el modal
+        this.mostrarAlerta("Error de Registro", mensajeReal);
       }
     });
   }
