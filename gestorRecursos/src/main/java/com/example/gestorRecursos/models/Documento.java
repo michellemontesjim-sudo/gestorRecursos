@@ -44,7 +44,6 @@ public class Documento {
 
     public Documento() {}
 
-    // --- GETTERS Y SETTERS ---
 
     public Long getIdDocumento() { return idDocumento; }
     public void setIdDocumento(Long idDocumento) { this.idDocumento = idDocumento; }

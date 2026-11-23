@@ -34,7 +34,7 @@ public class AsignaturaController {
 
     @PostMapping
     public ResponseEntity<Asignatura> crearAsignatura(@RequestBody Asignatura nuevaAsignatura) {
-        // Retornamos 201 CREATED que es la mejor práctica REST para la creación de un recurso
+        // Retornamos 201 CREATED cuando se crea una nueva asignatura
         return ResponseEntity.status(HttpStatus.CREATED).body(asignaturaService.crearAsignatura(nuevaAsignatura));
     }
 

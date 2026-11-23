@@ -62,7 +62,7 @@ public class UsuarioService {
         usuario.setResetTokenExpiracion(LocalDateTime.now().plusMinutes(15));
         usuarioRepository.save(usuario);
 
-        // Enviar correo (con respaldo en consola por si Railway bloquea puertos SMTP)
+        // Enviar correo
         if (mailSender == null) {
             System.out.println("ERROR: JavaMailSender es NULL. Maven no ha cargado spring-boot-starter-mail.");
         } else {

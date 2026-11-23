@@ -19,7 +19,6 @@ public class Asignatura {
 
     public Asignatura() {}
 
-    // Getters y Setters
     public Long getIdAsignatura() { return idAsignatura; }
     public void setIdAsignatura(Long idAsignatura) { this.idAsignatura = idAsignatura; }
     

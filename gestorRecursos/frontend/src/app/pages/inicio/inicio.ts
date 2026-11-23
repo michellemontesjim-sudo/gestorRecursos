@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router'; // 1. Importamos la directiva de r
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [RouterLink], // 2. La agregamos al arreglo de imports
+  imports: [RouterLink],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css'
 })

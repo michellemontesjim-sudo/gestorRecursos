@@ -46,7 +46,7 @@ export class RegistroComponent {
 
     const urlBackend = 'http://localhost:8080/api/usuarios/registro';
 
-    // 4. Hacemos la petición POST
+    
     this.http.post(urlBackend, this.nuevoUsuario, { responseType: 'text' }).subscribe({
       next: (respuesta) => {
         console.log("Respuesta del servidor:", respuesta);
